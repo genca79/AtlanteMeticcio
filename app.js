@@ -299,6 +299,7 @@ const state = {
   pendingFragment: null,
   editingFragmentId: null,
   dragState: null,
+  previewPointers: new Map(),
   cropDragState: null,
   editMode: "move",
   filters: { search: "", availability: "all", zone: "all" },
@@ -1084,6 +1085,7 @@ function closeEditor() {
   state.editorCollage = null;
   state.activeFragmentId = null;
   state.dragState = null;
+  state.previewPointers.clear();
   state.editMode = "move";
   elements.personForm.reset();
 }
@@ -2012,6 +2014,50 @@ function getStagePoint(event, stage) {
   };
 }
 
+function getPointerStagePoint(pointer) {
+  const stage = elements.collagePreview.querySelector(".collage-svg");
+  return stage ? getStagePoint(pointer, stage) : null;
+}
+
+function getGestureSnapshot(pointers) {
+  const first = getPointerStagePoint(pointers[0]);
+  const second = getPointerStagePoint(pointers[1]);
+  if (!first || !second) {
+    return null;
+  }
+  return {
+    midX: (first.x + second.x) / 2,
+    midY: (first.y + second.y) / 2,
+    distance: Math.max(12, Math.hypot(second.x - first.x, second.y - first.y)),
+    angle: Math.atan2(second.y - first.y, second.x - first.x) * (180 / Math.PI)
+  };
+}
+
+function startPreviewGesture(layerId) {
+  const pointers = Array.from(state.previewPointers.values()).slice(-2);
+  const snapshot = getGestureSnapshot(pointers);
+  if (!snapshot) {
+    return;
+  }
+  const fragment = getActiveFragment();
+  const libraryKey = getActiveLibraryKey();
+  const transform = libraryKey ? getLibraryTransform(libraryKey) : null;
+  state.dragState = {
+    layerId,
+    mode: "gesture",
+    startMidX: snapshot.midX,
+    startMidY: snapshot.midY,
+    startDistance: snapshot.distance,
+    startAngle: snapshot.angle,
+    baseRotation: fragment ? fragment.rotation : transform?.rotation ?? 0,
+    baseWidth: fragment ? fragment.width : 100,
+    baseHeight: fragment ? fragment.height : 100,
+    baseScale: transform?.scale ?? 1,
+    baseX: fragment ? fragment.x : (transform?.x ?? 0) + 122,
+    baseY: fragment ? fragment.y : (transform?.y ?? 0) + 122
+  };
+}
+
 function handlePreviewDoubleClick(event) {
   const targetLayer = event.target.closest("[data-layer-id]");
   if (!targetLayer?.dataset.layerId?.startsWith("library:")) {
@@ -2091,12 +2137,28 @@ function handlePreviewPointerDown(event) {
     return;
   }
 
-  const targetLayer = event.target.closest("[data-layer-id]");
+  let targetLayer = event.target.closest("[data-layer-id]");
+  if (!targetLayer && state.previewPointers.size > 0 && state.activeFragmentId) {
+    targetLayer = { dataset: { layerId: state.activeFragmentId } };
+  }
   if (!targetLayer || !state.editorCollage) {
     return;
   }
   event.preventDefault();
+  state.previewPointers.set(event.pointerId, {
+    pointerId: event.pointerId,
+    clientX: event.clientX,
+    clientY: event.clientY
+  });
   state.activeFragmentId = targetLayer.dataset.layerId;
+  if (state.previewPointers.size >= 2) {
+    startPreviewGesture(state.activeFragmentId);
+    window.addEventListener("pointermove", handlePreviewPointerMove);
+    window.addEventListener("pointerup", handlePreviewPointerUp);
+    window.addEventListener("pointercancel", handlePreviewPointerUp);
+    renderCollagePreviewFromForm();
+    return;
+  }
   const stage = elements.collagePreview.querySelector(".collage-svg");
   if (!stage) {
     return;
@@ -2120,6 +2182,7 @@ function handlePreviewPointerDown(event) {
   };
   window.addEventListener("pointermove", handlePreviewPointerMove);
   window.addEventListener("pointerup", handlePreviewPointerUp);
+  window.addEventListener("pointercancel", handlePreviewPointerUp);
   renderCollagePreviewFromForm();
 }
 
@@ -2127,7 +2190,45 @@ function handlePreviewPointerMove(event) {
   if (!state.dragState) {
     return;
   }
+  event.preventDefault();
+  if (state.previewPointers.has(event.pointerId)) {
+    state.previewPointers.set(event.pointerId, {
+      pointerId: event.pointerId,
+      clientX: event.clientX,
+      clientY: event.clientY
+    });
+  }
   const fragment = getActiveFragment();
+  if (state.dragState.mode === "gesture") {
+    const snapshot = getGestureSnapshot(Array.from(state.previewPointers.values()).slice(-2));
+    if (!snapshot) {
+      return;
+    }
+    const ratio = dampScaleRatio(snapshot.distance / state.dragState.startDistance);
+    const rotation = state.dragState.baseRotation + normalizeAngleDelta(snapshot.angle - state.dragState.startAngle);
+    const dx = snapshot.midX - state.dragState.startMidX;
+    const dy = snapshot.midY - state.dragState.startMidY;
+    if (fragment && `fragment:${fragment.id}` === state.dragState.layerId) {
+      fragment.x = clamp(state.dragState.baseX + dx, 0, 240);
+      fragment.y = clamp(state.dragState.baseY + dy, 0, 240);
+      fragment.width = clamp(state.dragState.baseWidth * ratio, 24, 210);
+      fragment.height = clamp(state.dragState.baseHeight * ratio, 24, 210);
+      fragment.rotation = clamp(rotation, -360, 360);
+      renderCollagePreviewFromForm();
+      return;
+    }
+    const libraryKey = getActiveLibraryKey();
+    if (!libraryKey) {
+      return;
+    }
+    updateActiveLibraryTransform({
+      x: clamp(state.dragState.baseX + dx - 122, -100, 100),
+      y: clamp(state.dragState.baseY + dy - 122, -100, 100),
+      scale: clamp(state.dragState.baseScale * ratio, 0.3, 2.2),
+      rotation: clamp(rotation, -360, 360)
+    });
+    return;
+  }
   const dx = (event.clientX - state.dragState.startX) * state.dragState.scaleX;
   const dy = (event.clientY - state.dragState.startY) * state.dragState.scaleY;
   const stage = elements.collagePreview.querySelector(".collage-svg");
@@ -2185,10 +2286,40 @@ function handlePreviewPointerMove(event) {
   renderCollagePreviewFromForm();
 }
 
-function handlePreviewPointerUp() {
-  state.dragState = null;
-  window.removeEventListener("pointermove", handlePreviewPointerMove);
-  window.removeEventListener("pointerup", handlePreviewPointerUp);
+function handlePreviewPointerUp(event) {
+  if (event?.pointerId !== undefined) {
+    state.previewPointers.delete(event.pointerId);
+  } else {
+    state.previewPointers.clear();
+  }
+
+  if (state.dragState?.mode === "gesture" && state.previewPointers.size === 1) {
+    const remaining = Array.from(state.previewPointers.values())[0];
+    const stage = elements.collagePreview.querySelector(".collage-svg");
+    const point = stage ? getStagePoint(remaining, stage) : null;
+    const fragment = getActiveFragment();
+    const libraryKey = getActiveLibraryKey();
+    state.dragState = {
+      layerId: state.activeFragmentId,
+      mode: state.editMode === "crop" && fragment ? "crop" : "move",
+      startX: remaining.clientX,
+      startY: remaining.clientY,
+      baseX: fragment ? fragment.x : getLibraryTransform(libraryKey).x + 122,
+      baseY: fragment ? fragment.y : getLibraryTransform(libraryKey).y + 122,
+      baseCropX: fragment?.cropX ?? 0,
+      baseCropY: fragment?.cropY ?? 0,
+      scaleX: point?.scaleX ?? 1,
+      scaleY: point?.scaleY ?? 1
+    };
+    return;
+  }
+
+  if (state.previewPointers.size === 0) {
+    state.dragState = null;
+    window.removeEventListener("pointermove", handlePreviewPointerMove);
+    window.removeEventListener("pointerup", handlePreviewPointerUp);
+    window.removeEventListener("pointercancel", handlePreviewPointerUp);
+  }
 }
 
 function handlePreviewWheel(event) {

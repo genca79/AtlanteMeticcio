@@ -624,6 +624,8 @@ textarea:focus {
   min-height: clamp(360px, 48vh, 540px);
   position: relative;
   overflow: hidden;
+  touch-action: none;
+  user-select: none;
   border-radius: 24px;
   background:
     radial-gradient(circle at 20% 20%, rgba(255, 249, 238, 0.95), rgba(244, 226, 196, 0.9) 60%, rgba(232, 214, 186, 0.92) 100%);
@@ -677,6 +679,8 @@ textarea:focus {
   display: block;
   width: 100%;
   height: 100%;
+  touch-action: none;
+  user-select: none;
 }
 
 .collage-stage-base,
@@ -975,6 +979,36 @@ textarea:focus {
 
   .map-stage {
     min-height: 520px;
+  }
+
+  .editor-dialog {
+    width: min(100%, calc(100% - 10px));
+  }
+
+  .collage-preview {
+    min-height: min(76vh, 560px);
+    border-radius: 18px;
+  }
+
+  .collage-controls {
+    gap: 10px;
+  }
+
+  .floating-toolbar {
+    gap: 6px;
+    padding: 7px;
+    max-width: min(310px, calc(100% - 12px));
+  }
+
+  .floating-toolbar button,
+  .toolbar-color-input {
+    width: 38px;
+    height: 38px;
+  }
+
+  .floating-toolbar svg {
+    width: 18px;
+    height: 18px;
   }
 
   .map-node {
