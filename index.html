@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atlante Meticcio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Cantieri Meticci</p>
+        <h1>Atlante Meticcio</h1>
+        <p class="lead">
+          Una mappa di Cantieri Meticci come comunità di pratica.
+          Ogni persona è invitata a sceglie la propria distanza dal centro, raccontare desideri e disponibilita,
+          e costruire un pupazzo digitale.
+        </p>
+      </div>
+      <div class="hero-actions">
+        <button id="connectButton" class="ghost-button" type="button">Configura cloud</button>
+        <button id="authButton" class="ghost-button" type="button">Admin</button>
+        <button id="addPersonButton" class="primary-button" type="button">Aggiungi persona</button>
+        <button id="exportButton" class="ghost-button" type="button">Esporta JSON</button>
+        <button id="resetButton" class="ghost-button" type="button">Ripristina demo</button>
+      </div>
+    </header>
+
+    <section class="status-strip panel">
+      <div class="status-item">
+        <span class="status-label">Modalita dati</span>
+        <strong id="storageModeLabel">Locale</strong>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Accesso</span>
+        <strong id="authStatusLabel">Libero</strong>
+      </div>
+      <div class="status-item status-item-wide">
+        <span class="status-label">Stato</span>
+        <strong id="syncStatusLabel">Il prototipo usa i dati salvati nel browser.</strong>
+      </div>
+    </section>
+
+    <main class="layout">
+      <section class="map-panel panel">
+        <div class="panel-head">
+          <div>
+            <p class="panel-kicker"></p>
+            <h2>Costellazione della compagnia</h2>
+          </div>
+          <div class="legend">
+            <span><i class="legend-core"></i>Nucleo</span>
+            <span><i class="legend-middle"></i>Persone attive</span>
+            <span><i class="legend-edge"></i>Margine fertile</span>
+          </div>
+        </div>
+
+        <div class="filters">
+          <label>
+            <span>Cerca</span>
+            <input id="searchInput" type="search" placeholder="Nome, talento, desiderio">
+          </label>
+          <label>
+            <span>Disponibilita</span>
+            <select id="availabilityFilter">
+              <option value="all">Tutte</option>
+              <option value="Alta">Alta</option>
+              <option value="Media">Media</option>
+              <option value="Bassa">Bassa</option>
+              <option value="A chiamata">A chiamata</option>
+            </select>
+          </label>
+          <label>
+            <span>Zona</span>
+            <select id="zoneFilter">
+              <option value="all">Tutte</option>
+              <option value="core">Nucleo</option>
+              <option value="middle">Persona attiva</option>
+              <option value="edge">Margine fertile</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="map-stage">
+          <svg id="mapConnections" class="map-connections" aria-hidden="true"></svg>
+          <div class="map-rings" aria-hidden="true">
+            <div class="ring ring-1"></div>
+            <div class="ring ring-2"></div>
+            <div class="ring ring-3"></div>
+            <div class="map-center-mark">Nucleo</div>
+          </div>
+          <div id="mapNodes" class="map-nodes" aria-live="polite"></div>
+        </div>
+
+        <div class="panel-foot">
+          <p id="mapSummary"></p>
+        </div>
+      </section>
+
+      <aside class="detail-panel panel">
+        <div class="panel-head">
+          <div>
+            <p class="panel-kicker">Scheda</p>
+            <h2></h2>
+          </div>
+          <button id="editPersonButton" class="ghost-button small" type="button">Modifica</button>
+        </div>
+        <div id="detailCard" class="detail-card"></div>
+      </aside>
+    </main>
+
+    <section class="gallery-panel panel">
+      <div class="panel-head">
+        <div>
+          <p class="panel-kicker">Corpi simbolici</p>
+          <h2>Galleria dei collage digitali</h2>
+        </div>
+      </div>
+      <div id="galleryGrid" class="gallery-grid"></div>
+    </section>
+  </div>
+
+  <dialog id="editorDialog" class="editor-dialog">
+    <form id="personForm" class="editor-form" method="dialog">
+      <div class="editor-header">
+        <div>
+          <p class="panel-kicker">Editor persona</p>
+          <h2 id="dialogTitle">Nuova persona</h2>
+        </div>
+        <button id="closeDialogButton" class="ghost-button small" type="button">Chiudi</button>
+      </div>
+
+      <div class="editor-grid">
+        <section class="form-section">
+          <label>
+            <span>Nome</span>
+            <input id="nameInput" name="name" type="text" maxlength="60" required>
+          </label>
+          <label>
+            <span>Ruolo o provenienza</span>
+            <input id="roleInput" name="role" type="text" maxlength="80" placeholder="Attrice, mediatore, volontaria...">
+          </label>
+          <label>
+            <span>Autoritratto</span>
+            <textarea id="bioInput" name="bio" rows="4" maxlength="320" placeholder="Una breve frase per raccontarti."></textarea>
+          </label>
+          <label>
+            <span>Desideri per la compagnia</span>
+            <textarea id="desireInput" name="desire" rows="3" maxlength="260"></textarea>
+          </label>
+          <label>
+            <span>Cosa puoi offrire</span>
+            <textarea id="offersInput" name="offers" rows="3" maxlength="260"></textarea>
+          </label>
+          <label>
+            <span>Di cosa hai bisogno</span>
+            <textarea id="needsInput" name="needs" rows="3" maxlength="260"></textarea>
+          </label>
+        </section>
+
+        <section class="form-section">
+          <label>
+            <span>Talenti e competenze</span>
+            <input id="talentsInput" name="talents" type="text" maxlength="140" placeholder="Voce, scenografia, cura, mediazione">
+          </label>
+          <label>
+            <span>Parole chiave</span>
+            <input id="tagsInput" name="tags" type="text" maxlength="140" placeholder="Corpo, quartiere, ascolto, bambini">
+          </label>
+          <label>
+            <span>Disponibilita di tempo</span>
+            <select id="availabilityInput" name="availability">
+              <option value="Alta">Alta</option>
+              <option value="Media">Media</option>
+              <option value="Bassa">Bassa</option>
+              <option value="A chiamata">A chiamata</option>
+            </select>
+          </label>
+          <label>
+            <span>Distanza dal centro</span>
+            <input id="closenessInput" name="closeness" type="range" min="0" max="100" step="1" value="50">
+            <small id="closenessValue">50 / 100</small>
+          </label>
+          <div class="hint-box">
+            <p>
+              0 significa margine fertile, 100 significa grande prossimita al nucleo della compagnia.
+              La posizione non è gerarchica: può cambiare nel tempo.
+            </p>
+          </div>
+        </section>
+
+        <section class="form-section collage-section">
+          <div class="collage-head">
+            <div>
+              <span class="field-title">Pupazzo digitale</span>
+              <p>Scegli una struttura di base e poi costruisci un collage personale piu libero.</p>
+            </div>
+          </div>
+          <div id="collagePreview" class="collage-preview"></div>
+          <div class="collage-controls">
+            <label>
+              <span>Testa</span>
+              <select id="headInput" name="head"></select>
+            </label>
+            <label>
+              <span>Corpo</span>
+              <select id="bodyInput" name="body"></select>
+            </label>
+            <label>
+              <span>Elemento</span>
+              <select id="elementInput" name="element"></select>
+            </label>
+            <label>
+              <span>Oggetto</span>
+              <select id="companionInput" name="companion"></select>
+            </label>
+            <label class="upload-field">
+              <span>Frammenti personali</span>
+              <input id="customImageInput" name="customImage" type="file" accept="image/*" multiple>
+            </label>
+            <label>
+              <span>Colloca il frammento</span>
+              <select id="customImagePlacementInput" name="customImagePlacement">
+                <option value="body">Sul corpo</option>
+                <option value="head">Sul volto</option>
+                <option value="companion">Come oggetto</option>
+              </select>
+            </label>
+            <label>
+              <span>Scala frammento</span>
+              <input id="customImageScaleInput" name="customImageScale" type="range" min="60" max="160" step="1" value="100">
+              <small id="customImageScaleValue">100%</small>
+            </label>
+            <label>
+              <span>Rotazione frammento</span>
+              <input id="customImageRotationInput" name="customImageRotation" type="range" min="-35" max="35" step="1" value="0">
+              <small id="customImageRotationValue">0°</small>
+            </label>
+            <button id="removeCustomImageButton" class="ghost-button small" type="button">Rimuovi frammento</button>
+          </div>
+          <div class="collage-workbench">
+            <div class="collage-stage-column">
+              <p class="stage-hint">Seleziona un elemento e manipolalo direttamente sulla figura: trascina per spostare, usa le maniglie per ruotare e ridimensionare. In ritaglio sposti l'immagine dentro la sagoma.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="editor-footer">
+        <button id="hidePersonButton" class="ghost-button" type="button">Nascondi</button>
+        <button id="deletePersonButton" class="danger-button" type="button">Elimina</button>
+        <div class="editor-footer-actions">
+          <button class="ghost-button" type="button" id="cancelButton">Annulla</button>
+          <button class="primary-button" type="submit">Salva persona</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="authDialog" class="editor-dialog">
+    <form id="authForm" class="editor-form auth-form" method="dialog">
+      <div class="editor-header">
+        <div>
+          <p class="panel-kicker">Area riservata</p>
+          <h2>Admin</h2>
+        </div>
+        <button id="closeAuthDialogButton" class="ghost-button small" type="button">Chiudi</button>
+      </div>
+      <div class="auth-grid">
+        <section class="form-section">
+          <label>
+            <span>Email</span>
+            <input id="emailInput" type="email" placeholder="nome@cantierimeticci.org">
+          </label>
+          <div class="hint-box">
+            <p>
+              L'accesso serve solo agli amministratori. Le persone della compagnia possono creare il profilo senza login.
+            </p>
+          </div>
+        </section>
+        <section class="form-section">
+          <h3 class="mini-title">Configurazione attesa</h3>
+          <p class="auth-copy">
+            L'email deve essere presente nella tabella admin_users di Supabase.
+            Dopo l'accesso puoi nascondere, modificare o cancellare i profili.
+          </p>
+          <div class="auth-actions">
+            <button id="sendMagicLinkButton" class="primary-button" type="submit">Invia magic link</button>
+            <button id="signOutButton" class="ghost-button" type="button">Esci</button>
+          </div>
+        </section>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
