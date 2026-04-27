@@ -15,58 +15,49 @@
       <div class="hero-copy">
         <p class="eyebrow">Cantieri Meticci</p>
         <h1>Atlante Meticcio</h1>
-        <p class="lead">
+        <p class="lead" id="heroLead">
           Una mappa di Cantieri Meticci come comunità di pratica.
           Ogni persona è invitata a sceglie la propria distanza dal centro, raccontare desideri e disponibilita,
           e costruire un pupazzo digitale.
         </p>
       </div>
       <div class="hero-actions">
+        <div class="language-switcher" aria-label="Lingua">
+          <button class="language-button is-active" type="button" data-lang="it">ITA</button>
+          <button class="language-button" type="button" data-lang="en">ENG</button>
+          <button class="language-button" type="button" data-lang="fr">FRA</button>
+          <button class="language-button" type="button" data-lang="ar">العربية</button>
+        </div>
         <button id="authButton" class="ghost-button" type="button" hidden>Admin</button>
         <button id="addPersonButton" class="primary-button" type="button">Aggiungi persona</button>
-        <button id="exportButton" class="ghost-button" type="button">Esporta JSON</button>
-        <button id="importButton" class="ghost-button" type="button">Carica JSON</button>
+        <button id="exportButton" class="ghost-button" type="button">Esporta Mappa</button>
+        <button id="importButton" class="ghost-button" type="button">Importa Mappa</button>
         <input id="importFileInput" type="file" accept="application/json,.json" hidden>
         <button id="resetButton" class="ghost-button" type="button">Ripristina demo</button>
       </div>
     </header>
-
-    <section class="status-strip panel">
-      <div class="status-item">
-        <span class="status-label">Modalita dati</span>
-        <strong id="storageModeLabel">Locale</strong>
-      </div>
-      <div class="status-item">
-        <span class="status-label">Accesso</span>
-        <strong id="authStatusLabel">Libero</strong>
-      </div>
-      <div class="status-item status-item-wide">
-        <span class="status-label">Stato</span>
-        <strong id="syncStatusLabel">Il prototipo usa i dati salvati nel browser.</strong>
-      </div>
-    </section>
 
     <main class="layout">
       <section class="map-panel panel">
         <div class="panel-head">
           <div>
             <p class="panel-kicker"></p>
-            <h2>Costellazione della compagnia</h2>
+            <h2 id="mapTitle">Costellazione della compagnia</h2>
           </div>
           <div class="legend">
-            <span><i class="legend-core"></i>Nucleo</span>
-            <span><i class="legend-middle"></i>Persone attive</span>
-            <span><i class="legend-edge"></i>Margine fertile</span>
+            <span><i class="legend-core"></i><b id="legendCore">Nucleo</b></span>
+            <span><i class="legend-middle"></i><b id="legendMiddle">Persone attive</b></span>
+            <span><i class="legend-edge"></i><b id="legendEdge">Margine fertile</b></span>
           </div>
         </div>
 
         <div class="filters">
           <label>
-            <span>Cerca</span>
+            <span id="searchLabel">Cerca</span>
             <input id="searchInput" type="search" placeholder="Nome, talento, desiderio">
           </label>
           <label>
-            <span>Disponibilita</span>
+            <span id="availabilityFilterLabel">Disponibilita</span>
             <select id="availabilityFilter">
               <option value="all">Tutte</option>
               <option value="Alta">Alta</option>
@@ -76,7 +67,7 @@
             </select>
           </label>
           <label>
-            <span>Zona</span>
+            <span id="zoneFilterLabel">Zona</span>
             <select id="zoneFilter">
               <option value="all">Tutte</option>
               <option value="core">Nucleo</option>
@@ -92,7 +83,7 @@
             <div class="ring ring-1"></div>
             <div class="ring ring-2"></div>
             <div class="ring ring-3"></div>
-            <div class="map-center-mark">Nucleo</div>
+            <div class="map-center-mark" id="mapCenterMark">Nucleo</div>
           </div>
           <div id="mapNodes" class="map-nodes" aria-live="polite"></div>
         </div>
@@ -105,7 +96,7 @@
       <aside class="detail-panel panel">
         <div class="panel-head">
           <div>
-            <p class="panel-kicker">Scheda</p>
+            <p class="panel-kicker" id="detailKicker">Scheda</p>
             <h2></h2>
           </div>
           <button id="editPersonButton" class="ghost-button small" type="button">Modifica</button>
@@ -117,8 +108,8 @@
     <section class="gallery-panel panel">
       <div class="panel-head">
         <div>
-          <p class="panel-kicker">Corpi simbolici</p>
-          <h2>Galleria dei collage digitali</h2>
+          <p class="panel-kicker" id="galleryKicker">Corpi simbolici</p>
+          <h2 id="galleryTitle">Galleria dei collage digitali</h2>
         </div>
       </div>
       <div id="galleryGrid" class="gallery-grid"></div>
@@ -129,7 +120,7 @@
     <form id="personForm" class="editor-form" method="dialog">
       <div class="editor-header">
         <div>
-          <p class="panel-kicker">Editor persona</p>
+          <p class="panel-kicker" id="editorKicker">Editor persona</p>
           <h2 id="dialogTitle">Nuova persona</h2>
         </div>
         <button id="closeDialogButton" class="ghost-button small" type="button">Chiudi</button>
@@ -198,7 +189,7 @@
           <div class="collage-head">
             <div>
               <span class="field-title">Pupazzo digitale</span>
-              <p>Scegli una struttura di base e poi costruisci un collage personale piu libero.</p>
+              <p>Puoi scegliere strutture di base o costruire un collage personale piu libero caricando immagini.</p>
             </div>
           </div>
           <div id="collagePreview" class="collage-preview"></div>
@@ -245,7 +236,7 @@
           </div>
           <div class="collage-workbench">
             <div class="collage-stage-column">
-              <p class="stage-hint">Seleziona un elemento e manipolalo direttamente sulla figura: trascina per spostare, usa le maniglie per ruotare e ridimensionare. In ritaglio sposti l'immagine dentro la sagoma.</p>
+              <p class="stage-hint">Seleziona un elemento e manipolalo direttamente sulla figura</p>
             </div>
           </div>
         </section>
@@ -258,6 +249,49 @@
           <button class="ghost-button" type="button" id="cancelButton">Annulla</button>
           <button class="primary-button" type="submit">Salva persona</button>
         </div>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="fragmentCropDialog" class="editor-dialog fragment-crop-dialog">
+    <form id="fragmentCropForm" class="editor-form fragment-crop-form" method="dialog">
+      <div class="editor-header">
+        <div>
+          <p id="cropKicker" class="panel-kicker">Frammento personale</p>
+          <h2 id="cropTitle">Ritaglia immagine</h2>
+        </div>
+        <button id="closeFragmentCropButton" class="ghost-button small" type="button">Chiudi</button>
+      </div>
+      <div class="fragment-crop-grid">
+        <div id="fragmentCropPreview" class="fragment-crop-preview"></div>
+        <section class="form-section">
+          <label>
+            <span>Forma ritaglio</span>
+            <select id="fragmentMaskInput">
+              <option value="rect">Rettangolo</option>
+              <option value="square">Quadrato</option>
+              <option value="oval">Ovale</option>
+              <option value="diamond">Losanga</option>
+              <option value="torn">Strappo</option>
+            </select>
+          </label>
+          <label>
+            <span>Sposta orizzontale</span>
+            <input id="fragmentCropXInput" type="range" min="-80" max="80" step="1" value="0">
+          </label>
+          <label>
+            <span>Sposta verticale</span>
+            <input id="fragmentCropYInput" type="range" min="-80" max="80" step="1" value="0">
+          </label>
+          <label>
+            <span>Zoom immagine</span>
+            <input id="fragmentCropZoomInput" type="range" min="100" max="260" step="1" value="100">
+          </label>
+          <div class="editor-footer-actions">
+            <button id="cancelFragmentCropButton" class="ghost-button" type="button">Annulla</button>
+            <button id="confirmFragmentCropButton" class="primary-button" type="submit">Importa ritaglio</button>
+          </div>
+        </section>
       </div>
     </form>
   </dialog>

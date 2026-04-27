@@ -1,8 +1,169 @@
 "use strict";
 
 const STORAGE_KEY = "cantieri-meticci-atlante-v2";
+const LANGUAGE_KEY = "cantieri-meticci-language";
 const PEOPLE_TABLE = "community_profiles";
 const CONFIG = window.APP_CONFIG || {};
+
+const translations = {
+  it: {
+    heroLead: "Una mappa di Cantieri Meticci come comunita di pratica. Ogni persona e invitata a scegliere la propria distanza dal centro, raccontare desideri e disponibilita, e costruire un pupazzo digitale.",
+    addPerson: "Aggiungi persona", exportMap: "Esporta Mappa", importMap: "Importa Mappa", resetDemo: "Ripristina demo",
+    mapTitle: "Costellazione della compagnia", core: "Nucleo", middlePlural: "Persone attive", edge: "Margine fertile",
+    search: "Cerca", searchPlaceholder: "Nome, talento, desiderio", availability: "Disponibilita", zone: "Zona", allF: "Tutte",
+    zoneCore: "Nucleo", zoneMiddle: "Persona attiva", zoneEdge: "Margine fertile",
+    detailKicker: "Scheda", edit: "Modifica", galleryKicker: "Corpi simbolici", galleryTitle: "Galleria dei collage digitali",
+    editorKicker: "Editor persona", newPerson: "Nuova persona", editPerson: "Modifica persona", close: "Chiudi",
+    name: "Nome", role: "Ruolo o provenienza", rolePlaceholder: "Attrice, mediatore, volontaria...",
+    bio: "Autoritratto", bioPlaceholder: "Una breve frase per raccontarti.", desire: "Desideri per la compagnia",
+    offers: "Cosa puoi offrire", needs: "Di cosa hai bisogno", talents: "Talenti e competenze",
+    talentsPlaceholder: "Voce, scenografia, cura, mediazione", tags: "Parole chiave",
+    tagsPlaceholder: "Corpo, quartiere, ascolto, bambini", timeAvailability: "Disponibilita di tempo",
+    closeness: "Distanza dal centro", closenessHint: "0 significa margine fertile, 100 significa grande prossimita al nucleo della compagnia. La posizione non e gerarchica: puo cambiare nel tempo.",
+    puppet: "Pupazzo digitale", puppetHint: "Scegli una struttura di base e poi costruisci un collage personale piu libero.",
+    head: "Testa", body: "Corpo", element: "Elemento", object: "Oggetto", personalFragments: "Frammenti personali",
+    placeFragment: "Colloca il frammento", onBody: "Sul corpo", onFace: "Sul volto", asObject: "Come oggetto",
+    fragmentScale: "Scala frammento", fragmentRotation: "Rotazione frammento", removeFragment: "Rimuovi frammento",
+    stageHint: "Seleziona un elemento e manipolalo direttamente sulla figura: trascina per spostare, usa le maniglie per ruotare e ridimensionare. In ritaglio sposti l'immagine dentro la sagoma.",
+    hide: "Nascondi", delete: "Elimina", cancel: "Annulla", savePerson: "Salva persona",
+    noSelection: "Nessuna persona selezionata. Aggiungi una nuova persona oppure usa i filtri per esplorare la costellazione.",
+    noMatches: "Nessuna persona corrisponde ai filtri attivi.", personFallback: "Persona della compagnia",
+    visibleSummary: "{visible} persone visibili su {total}.", availabilityPrefix: "Disponibilita", centerPrefix: "Vicino al centro",
+    selfPortrait: "Autoritratto", desires: "Desideri", offersTitle: "Cosa offre", needsTitle: "Bisogni", talentsTitle: "Talenti e competenze", tagsTitle: "Parole chiave",
+    rotateLeft: "Ruota a sinistra", rotateRight: "Ruota a destra", smaller: "Riduci", larger: "Ingrandisci", scale: "scala", rotate: "ruota", crop: "ritaglio", move: "sposta",
+    codePrompt: "Inserisci il codice laboratorio per {action}.", wrongCode: "Codice laboratorio non corretto.",
+    actionCreate: "creare un nuovo pupazzo", actionEdit: "modificare questo pupazzo", actionDelete: "cancellare questo pupazzo", actionHide: "nascondere questo pupazzo", actionImport: "caricare un backup JSON",
+    confirmDelete: "Eliminare {name}?", confirmHide: "Nascondere {name} dalla mappa pubblica?", confirmImport: "Caricare {count} profili dal JSON? La mappa corrente verra sostituita.",
+    thisPerson: "questa persona", importEmpty: "Il file JSON non contiene profili validi.", importOk: "Backup JSON caricato nella mappa.", invalidJson: "JSON non valido: {message}",
+    resetConfirm: "Ripristinare i dati demo? I dati locali verranno sostituiti.", cloudEmpty: "Database condiviso vuoto. Aggiungi la prima persona per popolare la mappa.", editNeedsCode: "Inserisci il codice laboratorio per modificare le schede pubblicate.",
+    cropKicker: "Frammento personale", cropTitle: "Ritaglia immagine", cropShape: "Forma ritaglio", cropX: "Sposta orizzontale", cropY: "Sposta verticale", cropZoom: "Zoom immagine", cropImport: "Importa ritaglio", rect: "Rettangolo", square: "Quadrato", oval: "Ovale", diamond: "Losanga", torn: "Strappo", backward: "Porta indietro", forward: "Porta avanti"
+  },
+  en: {
+    heroLead: "A map of Cantieri Meticci as a community of practice. Each person is invited to choose their distance from the center, share desires and availability, and build a digital puppet.",
+    addPerson: "Add person", exportMap: "Export Map", importMap: "Import Map", resetDemo: "Restore demo",
+    mapTitle: "Company constellation", core: "Core", middlePlural: "Active people", edge: "Fertile edge",
+    search: "Search", searchPlaceholder: "Name, talent, desire", availability: "Availability", zone: "Zone", allF: "All",
+    zoneCore: "Core", zoneMiddle: "Active person", zoneEdge: "Fertile edge",
+    detailKicker: "Profile", edit: "Edit", galleryKicker: "Symbolic bodies", galleryTitle: "Digital collage gallery",
+    editorKicker: "Person editor", newPerson: "New person", editPerson: "Edit person", close: "Close",
+    name: "Name", role: "Role or origin", rolePlaceholder: "Actor, mediator, volunteer...",
+    bio: "Self-portrait", bioPlaceholder: "A short sentence to introduce yourself.", desire: "Desires for the company",
+    offers: "What you can offer", needs: "What you need", talents: "Talents and skills",
+    talentsPlaceholder: "Voice, set design, care, mediation", tags: "Keywords",
+    tagsPlaceholder: "Body, neighborhood, listening, children", timeAvailability: "Time availability",
+    closeness: "Distance from the center", closenessHint: "0 means fertile edge, 100 means strong closeness to the company core. The position is not hierarchical: it can change over time.",
+    puppet: "Digital puppet", puppetHint: "Choose a base structure and then build a freer personal collage.",
+    head: "Head", body: "Body", element: "Element", object: "Object", personalFragments: "Personal fragments",
+    placeFragment: "Place the fragment", onBody: "On the body", onFace: "On the face", asObject: "As an object",
+    fragmentScale: "Fragment scale", fragmentRotation: "Fragment rotation", removeFragment: "Remove fragment",
+    stageHint: "Select an element and manipulate it directly on the figure: drag to move, use handles to rotate and resize. In crop mode, move the image inside the shape.",
+    hide: "Hide", delete: "Delete", cancel: "Cancel", savePerson: "Save person",
+    noSelection: "No person selected. Add a new person or use filters to explore the constellation.",
+    noMatches: "No person matches the active filters.", personFallback: "Company person",
+    visibleSummary: "{visible} people visible out of {total}.", availabilityPrefix: "Availability", centerPrefix: "Close to center",
+    selfPortrait: "Self-portrait", desires: "Desires", offersTitle: "What they offer", needsTitle: "Needs", talentsTitle: "Talents and skills", tagsTitle: "Keywords",
+    rotateLeft: "Rotate left", rotateRight: "Rotate right", smaller: "Smaller", larger: "Larger", scale: "scale", rotate: "rotate", crop: "crop", move: "move",
+    codePrompt: "Enter the workshop code to {action}.", wrongCode: "Incorrect workshop code.",
+    actionCreate: "create a new puppet", actionEdit: "edit this puppet", actionDelete: "delete this puppet", actionHide: "hide this puppet", actionImport: "load a JSON backup",
+    confirmDelete: "Delete {name}?", confirmHide: "Hide {name} from the public map?", confirmImport: "Load {count} profiles from JSON? The current map will be replaced.",
+    thisPerson: "this person", importEmpty: "The JSON file does not contain valid profiles.", importOk: "JSON backup loaded into the map.", invalidJson: "Invalid JSON: {message}",
+    resetConfirm: "Restore demo data? Local data will be replaced.", cloudEmpty: "Shared database empty. Add the first person to populate the map.", editNeedsCode: "Enter the workshop code to edit published profiles.",
+    cropKicker: "Personal fragment", cropTitle: "Crop image", cropShape: "Crop shape", cropX: "Move horizontally", cropY: "Move vertically", cropZoom: "Image zoom", cropImport: "Import crop", rect: "Rectangle", square: "Square", oval: "Oval", diamond: "Diamond", torn: "Torn", backward: "Send backward", forward: "Bring forward"
+  },
+  fr: {
+    heroLead: "Une carte de Cantieri Meticci comme communaute de pratique. Chaque personne est invitee a choisir sa distance du centre, raconter ses desirs et disponibilites, et construire une marionnette numerique.",
+    addPerson: "Ajouter une personne", exportMap: "Exporter la carte", importMap: "Importer la carte", resetDemo: "Restaurer la demo",
+    mapTitle: "Constellation de la compagnie", core: "Noyau", middlePlural: "Personnes actives", edge: "Marge fertile",
+    search: "Chercher", searchPlaceholder: "Nom, talent, desir", availability: "Disponibilite", zone: "Zone", allF: "Toutes",
+    zoneCore: "Noyau", zoneMiddle: "Personne active", zoneEdge: "Marge fertile",
+    detailKicker: "Fiche", edit: "Modifier", galleryKicker: "Corps symboliques", galleryTitle: "Galerie des collages numeriques",
+    editorKicker: "Editeur personne", newPerson: "Nouvelle personne", editPerson: "Modifier la personne", close: "Fermer",
+    name: "Nom", role: "Role ou provenance", rolePlaceholder: "Actrice, mediateur, volontaire...",
+    bio: "Autoportrait", bioPlaceholder: "Une courte phrase pour te presenter.", desire: "Desirs pour la compagnie",
+    offers: "Ce que tu peux offrir", needs: "Ce dont tu as besoin", talents: "Talents et competences",
+    talentsPlaceholder: "Voix, scenographie, soin, mediation", tags: "Mots-cles",
+    tagsPlaceholder: "Corps, quartier, ecoute, enfants", timeAvailability: "Disponibilite de temps",
+    closeness: "Distance du centre", closenessHint: "0 signifie marge fertile, 100 signifie grande proximite avec le noyau de la compagnie. La position n'est pas hierarchique: elle peut changer dans le temps.",
+    puppet: "Marionnette numerique", puppetHint: "Choisis une structure de base puis construis un collage personnel plus libre.",
+    head: "Tete", body: "Corps", element: "Element", object: "Objet", personalFragments: "Fragments personnels",
+    placeFragment: "Placer le fragment", onBody: "Sur le corps", onFace: "Sur le visage", asObject: "Comme objet",
+    fragmentScale: "Echelle du fragment", fragmentRotation: "Rotation du fragment", removeFragment: "Retirer le fragment",
+    stageHint: "Selectionne un element et manipule-le directement sur la figure: fais glisser pour deplacer, utilise les poignees pour tourner et redimensionner. En recadrage, deplace l'image dans la forme.",
+    hide: "Masquer", delete: "Supprimer", cancel: "Annuler", savePerson: "Enregistrer",
+    noSelection: "Aucune personne selectionnee. Ajoute une personne ou utilise les filtres pour explorer la constellation.",
+    noMatches: "Aucune personne ne correspond aux filtres actifs.", personFallback: "Personne de la compagnie",
+    visibleSummary: "{visible} personnes visibles sur {total}.", availabilityPrefix: "Disponibilite", centerPrefix: "Proche du centre",
+    selfPortrait: "Autoportrait", desires: "Desirs", offersTitle: "Ce qu'elle offre", needsTitle: "Besoins", talentsTitle: "Talents et competences", tagsTitle: "Mots-cles",
+    rotateLeft: "Tourner a gauche", rotateRight: "Tourner a droite", smaller: "Reduire", larger: "Agrandir", scale: "echelle", rotate: "tourner", crop: "recadrage", move: "deplacer",
+    codePrompt: "Insere le code atelier pour {action}.", wrongCode: "Code atelier incorrect.",
+    actionCreate: "creer une nouvelle marionnette", actionEdit: "modifier cette marionnette", actionDelete: "supprimer cette marionnette", actionHide: "masquer cette marionnette", actionImport: "charger une sauvegarde JSON",
+    confirmDelete: "Supprimer {name}?", confirmHide: "Masquer {name} de la carte publique?", confirmImport: "Charger {count} profils depuis le JSON? La carte actuelle sera remplacee.",
+    thisPerson: "cette personne", importEmpty: "Le fichier JSON ne contient pas de profils valides.", importOk: "Sauvegarde JSON chargee dans la carte.", invalidJson: "JSON invalide: {message}",
+    resetConfirm: "Restaurer les donnees demo? Les donnees locales seront remplacees.", cloudEmpty: "Base partagee vide. Ajoute la premiere personne pour remplir la carte.", editNeedsCode: "Insere le code atelier pour modifier les fiches publiees.",
+    cropKicker: "Fragment personnel", cropTitle: "Recadrer l'image", cropShape: "Forme du recadrage", cropX: "Deplacer horizontalement", cropY: "Deplacer verticalement", cropZoom: "Zoom image", cropImport: "Importer le recadrage", rect: "Rectangle", square: "Carre", oval: "Ovale", diamond: "Losange", torn: "Dechirure", backward: "Reculer", forward: "Avancer"
+  },
+  ar: {
+    heroLead: "خريطة لكانتييري ميتشي كمجتمع ممارسة. يختار كل شخص مسافته من المركز، ويشارك رغباته وتوفره، ويبني دمية رقمية.",
+    addPerson: "إضافة شخص", exportMap: "تصدير الخريطة", importMap: "استيراد الخريطة", resetDemo: "استعادة المثال",
+    mapTitle: "كوكبة المجموعة", core: "النواة", middlePlural: "أشخاص نشطون", edge: "الهامش الخصب",
+    search: "بحث", searchPlaceholder: "اسم، موهبة، رغبة", availability: "التوفر", zone: "المنطقة", allF: "الكل",
+    zoneCore: "النواة", zoneMiddle: "شخص نشط", zoneEdge: "الهامش الخصب",
+    detailKicker: "بطاقة", edit: "تعديل", galleryKicker: "أجساد رمزية", galleryTitle: "معرض الكولاج الرقمي",
+    editorKicker: "محرر الشخص", newPerson: "شخص جديد", editPerson: "تعديل الشخص", close: "إغلاق",
+    name: "الاسم", role: "الدور أو الأصل", rolePlaceholder: "ممثلة، وسيط، متطوع...",
+    bio: "بورتريه ذاتي", bioPlaceholder: "جملة قصيرة للتعريف بنفسك.", desire: "الرغبات للمجموعة",
+    offers: "ما يمكنك تقديمه", needs: "ما تحتاجه", talents: "المواهب والمهارات",
+    talentsPlaceholder: "صوت، سينوغرافيا، رعاية، وساطة", tags: "كلمات مفتاحية",
+    tagsPlaceholder: "جسد، حي، إصغاء، أطفال", timeAvailability: "توفر الوقت",
+    closeness: "المسافة من المركز", closenessHint: "0 يعني الهامش الخصب، و100 يعني قربا كبيرا من نواة المجموعة. الموقع ليس تراتبيا ويمكن أن يتغير مع الوقت.",
+    puppet: "دمية رقمية", puppetHint: "اختر بنية أساسية ثم ابن كولاجا شخصيا أكثر حرية.",
+    head: "الرأس", body: "الجسد", element: "العنصر", object: "الغرض", personalFragments: "شظايا شخصية",
+    placeFragment: "ضع الشظية", onBody: "على الجسد", onFace: "على الوجه", asObject: "كغرض",
+    fragmentScale: "حجم الشظية", fragmentRotation: "دوران الشظية", removeFragment: "إزالة الشظية",
+    stageHint: "اختر عنصرا وحرّكه مباشرة على الشكل: اسحب للتحريك، واستخدم المقابض للدوران وتغيير الحجم. في وضع القص حرّك الصورة داخل الشكل.",
+    hide: "إخفاء", delete: "حذف", cancel: "إلغاء", savePerson: "حفظ الشخص",
+    noSelection: "لا يوجد شخص محدد. أضف شخصا جديدا أو استخدم المرشحات لاستكشاف الكوكبة.",
+    noMatches: "لا يوجد شخص يطابق المرشحات النشطة.", personFallback: "شخص من المجموعة",
+    visibleSummary: "{visible} أشخاص ظاهرون من {total}.", availabilityPrefix: "التوفر", centerPrefix: "القرب من المركز",
+    selfPortrait: "بورتريه ذاتي", desires: "الرغبات", offersTitle: "ما يقدمه", needsTitle: "الاحتياجات", talentsTitle: "المواهب والمهارات", tagsTitle: "كلمات مفتاحية",
+    rotateLeft: "تدوير يسارا", rotateRight: "تدوير يمينا", smaller: "تصغير", larger: "تكبير", scale: "الحجم", rotate: "دوران", crop: "قص", move: "تحريك",
+    codePrompt: "أدخل رمز الورشة من أجل {action}.", wrongCode: "رمز الورشة غير صحيح.",
+    actionCreate: "إنشاء دمية جديدة", actionEdit: "تعديل هذه الدمية", actionDelete: "حذف هذه الدمية", actionHide: "إخفاء هذه الدمية", actionImport: "تحميل نسخة JSON",
+    confirmDelete: "حذف {name}؟", confirmHide: "إخفاء {name} من الخريطة العامة؟", confirmImport: "تحميل {count} ملفات من JSON؟ سيتم استبدال الخريطة الحالية.",
+    thisPerson: "هذا الشخص", importEmpty: "ملف JSON لا يحتوي على ملفات صالحة.", importOk: "تم تحميل نسخة JSON في الخريطة.", invalidJson: "JSON غير صالح: {message}",
+    resetConfirm: "استعادة بيانات المثال؟ سيتم استبدال البيانات المحلية.", cloudEmpty: "قاعدة البيانات المشتركة فارغة. أضف أول شخص لملء الخريطة.", editNeedsCode: "أدخل رمز الورشة لتعديل الملفات المنشورة.",
+    cropKicker: "شظية شخصية", cropTitle: "قص الصورة", cropShape: "شكل القص", cropX: "تحريك أفقي", cropY: "تحريك عمودي", cropZoom: "تكبير الصورة", cropImport: "استيراد القص", rect: "مستطيل", square: "مربع", oval: "بيضاوي", diamond: "معين", torn: "ممزق", backward: "إلى الخلف", forward: "إلى الأمام"
+  }
+};
+
+Object.assign(translations.it, {
+  "availability.Alta": "Alta", "availability.Media": "Media", "availability.Bassa": "Bassa", "availability.A chiamata": "A chiamata",
+  "catalog.moon": "Luna", "catalog.shell": "Conchiglia", "catalog.seed": "Seme", "catalog.stone": "Sasso", "catalog.mask": "Maschera", "catalog.star": "Stella",
+  "catalog.thread": "Tessuto", "catalog.sea": "Mare", "catalog.leaf": "Foglia", "catalog.root": "Radice", "catalog.metal": "Lamiera", "catalog.sail": "Vela",
+  "catalog.water": "Acqua", "catalog.earth": "Terra", "catalog.air": "Aria", "catalog.fire": "Fuoco", "catalog.paper": "Carta", "catalog.shadow": "Ombra",
+  "catalog.branch": "Ramo", "catalog.lantern": "Lanterna", "catalog.kite": "Aquilone", "catalog.tube": "Tubo", "catalog.nest": "Nido", "catalog.key": "Chiave"
+});
+Object.assign(translations.en, {
+  "availability.Alta": "High", "availability.Media": "Medium", "availability.Bassa": "Low", "availability.A chiamata": "On call",
+  "catalog.moon": "Moon", "catalog.shell": "Shell", "catalog.seed": "Seed", "catalog.stone": "Stone", "catalog.mask": "Mask", "catalog.star": "Star",
+  "catalog.thread": "Fabric", "catalog.sea": "Sea", "catalog.leaf": "Leaf", "catalog.root": "Root", "catalog.metal": "Sheet metal", "catalog.sail": "Sail",
+  "catalog.water": "Water", "catalog.earth": "Earth", "catalog.air": "Air", "catalog.fire": "Fire", "catalog.paper": "Paper", "catalog.shadow": "Shadow",
+  "catalog.branch": "Branch", "catalog.lantern": "Lantern", "catalog.kite": "Kite", "catalog.tube": "Tube", "catalog.nest": "Nest", "catalog.key": "Key"
+});
+Object.assign(translations.fr, {
+  "availability.Alta": "Haute", "availability.Media": "Moyenne", "availability.Bassa": "Basse", "availability.A chiamata": "Sur appel",
+  "catalog.moon": "Lune", "catalog.shell": "Coquillage", "catalog.seed": "Graine", "catalog.stone": "Pierre", "catalog.mask": "Masque", "catalog.star": "Etoile",
+  "catalog.thread": "Tissu", "catalog.sea": "Mer", "catalog.leaf": "Feuille", "catalog.root": "Racine", "catalog.metal": "Tole", "catalog.sail": "Voile",
+  "catalog.water": "Eau", "catalog.earth": "Terre", "catalog.air": "Air", "catalog.fire": "Feu", "catalog.paper": "Papier", "catalog.shadow": "Ombre",
+  "catalog.branch": "Branche", "catalog.lantern": "Lanterne", "catalog.kite": "Cerf-volant", "catalog.tube": "Tube", "catalog.nest": "Nid", "catalog.key": "Cle"
+});
+Object.assign(translations.ar, {
+  "availability.Alta": "عال", "availability.Media": "متوسط", "availability.Bassa": "منخفض", "availability.A chiamata": "عند الطلب",
+  "catalog.moon": "قمر", "catalog.shell": "صدفة", "catalog.seed": "بذرة", "catalog.stone": "حجر", "catalog.mask": "قناع", "catalog.star": "نجمة",
+  "catalog.thread": "قماش", "catalog.sea": "بحر", "catalog.leaf": "ورقة", "catalog.root": "جذر", "catalog.metal": "معدن", "catalog.sail": "شراع",
+  "catalog.water": "ماء", "catalog.earth": "أرض", "catalog.air": "هواء", "catalog.fire": "نار", "catalog.paper": "ورق", "catalog.shadow": "ظل",
+  "catalog.branch": "غصن", "catalog.lantern": "فانوس", "catalog.kite": "طائرة ورقية", "catalog.tube": "أنبوب", "catalog.nest": "عش", "catalog.key": "مفتاح"
+});
 
 const collageCatalog = {
   head: [
@@ -112,13 +273,17 @@ const state = {
   editorId: null,
   editorCollage: null,
   activeFragmentId: null,
+  pendingFragment: null,
+  editingFragmentId: null,
   dragState: null,
+  cropDragState: null,
   editMode: "move",
   filters: { search: "", availability: "all", zone: "all" },
   supabase: null,
   user: null,
   isAdmin: false,
   accessGranted: false,
+  language: localStorage.getItem(LANGUAGE_KEY) || "it",
   useCloud: false,
   loading: false
 };
@@ -130,6 +295,7 @@ const elements = {
   importButton: document.querySelector("#importButton"),
   importFileInput: document.querySelector("#importFileInput"),
   resetButton: document.querySelector("#resetButton"),
+  languageButtons: document.querySelectorAll("[data-lang]"),
   authButton: document.querySelector("#authButton"),
   storageModeLabel: document.querySelector("#storageModeLabel"),
   authStatusLabel: document.querySelector("#authStatusLabel"),
@@ -172,6 +338,15 @@ const elements = {
   customImageRotationInput: document.querySelector("#customImageRotationInput"),
   customImageRotationValue: document.querySelector("#customImageRotationValue"),
   removeCustomImageButton: document.querySelector("#removeCustomImageButton"),
+  fragmentCropDialog: document.querySelector("#fragmentCropDialog"),
+  fragmentCropForm: document.querySelector("#fragmentCropForm"),
+  fragmentCropPreview: document.querySelector("#fragmentCropPreview"),
+  closeFragmentCropButton: document.querySelector("#closeFragmentCropButton"),
+  cancelFragmentCropButton: document.querySelector("#cancelFragmentCropButton"),
+  fragmentMaskInput: document.querySelector("#fragmentMaskInput"),
+  fragmentCropXInput: document.querySelector("#fragmentCropXInput"),
+  fragmentCropYInput: document.querySelector("#fragmentCropYInput"),
+  fragmentCropZoomInput: document.querySelector("#fragmentCropZoomInput"),
   authDialog: document.querySelector("#authDialog"),
   authForm: document.querySelector("#authForm"),
   closeAuthDialogButton: document.querySelector("#closeAuthDialogButton"),
@@ -187,6 +362,7 @@ async function initialize() {
   bindEvents();
   hideLegacySingleFragmentControls();
   maybeInitSupabase();
+  applyTranslations();
 
   if (!state.people.length) {
     state.people = structuredClone(demoPeople);
@@ -224,6 +400,14 @@ function bindEvents() {
   elements.importButton.addEventListener("click", handleImportButtonClick);
   elements.importFileInput.addEventListener("change", handleImportFileSelected);
   elements.resetButton.addEventListener("click", resetToDemo);
+  elements.languageButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      state.language = button.dataset.lang || "it";
+      localStorage.setItem(LANGUAGE_KEY, state.language);
+      applyTranslations();
+      render();
+    });
+  });
   elements.authButton.addEventListener("click", () => elements.authDialog.showModal());
   elements.closeAuthDialogButton.addEventListener("click", () => elements.authDialog.close());
   elements.authForm.addEventListener("submit", sendMagicLink);
@@ -251,6 +435,16 @@ function bindEvents() {
   elements.customImageScaleInput.addEventListener("input", updateCustomImageControls);
   elements.customImageRotationInput.addEventListener("input", updateCustomImageControls);
   elements.removeCustomImageButton.addEventListener("click", removeCustomImage);
+  elements.closeFragmentCropButton.addEventListener("click", closeFragmentCropDialog);
+  elements.cancelFragmentCropButton.addEventListener("click", closeFragmentCropDialog);
+  elements.fragmentCropForm.addEventListener("submit", confirmFragmentCrop);
+  [
+    elements.fragmentMaskInput,
+    elements.fragmentCropXInput,
+    elements.fragmentCropYInput,
+    elements.fragmentCropZoomInput
+  ].forEach((input) => input.addEventListener("input", updateFragmentCropPreview));
+  elements.fragmentCropPreview.addEventListener("pointerdown", handleFragmentCropPointerDown);
   elements.collagePreview.addEventListener("pointerdown", handlePreviewPointerDown);
   elements.collagePreview.addEventListener("wheel", handlePreviewWheel, { passive: false });
 
@@ -262,6 +456,144 @@ function bindEvents() {
       renderCollagePreviewFromForm();
     });
   });
+}
+
+function t(key, replacements = {}) {
+  const dictionary = translations[state.language] || translations.it;
+  let value = dictionary[key] ?? translations.it[key] ?? key;
+  Object.entries(replacements).forEach(([name, replacement]) => {
+    value = value.replaceAll(`{${name}}`, replacement);
+  });
+  return value;
+}
+
+function setText(selector, key) {
+  const element = document.querySelector(selector);
+  if (element) {
+    element.textContent = t(key);
+  }
+}
+
+function setPlaceholder(selector, key) {
+  const element = document.querySelector(selector);
+  if (element) {
+    element.setAttribute("placeholder", t(key));
+  }
+}
+
+function setLabelText(inputSelector, key) {
+  const input = document.querySelector(inputSelector);
+  const label = input?.closest("label")?.querySelector("span");
+  if (label) {
+    label.textContent = t(key);
+  }
+}
+
+function applyTranslations() {
+  document.documentElement.lang = state.language;
+  document.documentElement.dir = state.language === "ar" ? "rtl" : "ltr";
+  elements.languageButtons.forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.lang === state.language);
+  });
+
+  setText("#heroLead", "heroLead");
+  setText("#addPersonButton", "addPerson");
+  setText("#exportButton", "exportMap");
+  setText("#importButton", "importMap");
+  setText("#resetButton", "resetDemo");
+  setText("#mapTitle", "mapTitle");
+  setText("#legendCore", "core");
+  setText("#legendMiddle", "middlePlural");
+  setText("#legendEdge", "edge");
+  setText("#searchLabel", "search");
+  setPlaceholder("#searchInput", "searchPlaceholder");
+  setText("#availabilityFilterLabel", "availability");
+  setText("#zoneFilterLabel", "zone");
+  setText("#mapCenterMark", "core");
+  setText("#detailKicker", "detailKicker");
+  setText("#editPersonButton", "edit");
+  setText("#galleryKicker", "galleryKicker");
+  setText("#galleryTitle", "galleryTitle");
+  setText("#editorKicker", "editorKicker");
+  if (elements.dialogTitle) {
+    elements.dialogTitle.textContent = state.editorId ? t("editPerson") : t("newPerson");
+  }
+  setText("#closeDialogButton", "close");
+  setText("#hidePersonButton", "hide");
+  setText("#deletePersonButton", "delete");
+  setText("#cancelButton", "cancel");
+  const saveButton = document.querySelector("#personForm .primary-button[type='submit']");
+  if (saveButton) saveButton.textContent = t("savePerson");
+
+  setLabelText("#nameInput", "name");
+  setLabelText("#roleInput", "role");
+  setPlaceholder("#roleInput", "rolePlaceholder");
+  setLabelText("#bioInput", "bio");
+  setPlaceholder("#bioInput", "bioPlaceholder");
+  setLabelText("#desireInput", "desire");
+  setLabelText("#offersInput", "offers");
+  setLabelText("#needsInput", "needs");
+  setLabelText("#talentsInput", "talents");
+  setPlaceholder("#talentsInput", "talentsPlaceholder");
+  setLabelText("#tagsInput", "tags");
+  setPlaceholder("#tagsInput", "tagsPlaceholder");
+  setLabelText("#availabilityInput", "timeAvailability");
+  setLabelText("#closenessInput", "closeness");
+  const hint = document.querySelector(".hint-box p");
+  if (hint) hint.textContent = t("closenessHint");
+  setText(".field-title", "puppet");
+  const puppetHint = document.querySelector(".collage-head p");
+  if (puppetHint) puppetHint.textContent = t("puppetHint");
+  setLabelText("#headInput", "head");
+  setLabelText("#bodyInput", "body");
+  setLabelText("#elementInput", "element");
+  setLabelText("#companionInput", "object");
+  setLabelText("#customImageInput", "personalFragments");
+  setLabelText("#customImagePlacementInput", "placeFragment");
+  setLabelText("#customImageScaleInput", "fragmentScale");
+  setLabelText("#customImageRotationInput", "fragmentRotation");
+  setText("#removeCustomImageButton", "removeFragment");
+  setText(".stage-hint", "stageHint");
+  setText("#cropKicker", "cropKicker");
+  setText("#cropTitle", "cropTitle");
+  setText("#closeFragmentCropButton", "close");
+  setText("#cancelFragmentCropButton", "cancel");
+  setText("#confirmFragmentCropButton", "cropImport");
+  setLabelText("#fragmentMaskInput", "cropShape");
+  setLabelText("#fragmentCropXInput", "cropX");
+  setLabelText("#fragmentCropYInput", "cropY");
+  setLabelText("#fragmentCropZoomInput", "cropZoom");
+
+  translateOption("#availabilityFilter option[value='all']", "allF");
+  translateOption("#availabilityFilter option[value='Alta']", "availability.Alta");
+  translateOption("#availabilityFilter option[value='Media']", "availability.Media");
+  translateOption("#availabilityFilter option[value='Bassa']", "availability.Bassa");
+  translateOption("#availabilityFilter option[value='A chiamata']", "availability.A chiamata");
+  translateOption("#zoneFilter option[value='all']", "allF");
+  translateOption("#zoneFilter option[value='core']", "zoneCore");
+  translateOption("#zoneFilter option[value='middle']", "zoneMiddle");
+  translateOption("#zoneFilter option[value='edge']", "zoneEdge");
+  translateOption("#availabilityInput option[value='Alta']", "availability.Alta");
+  translateOption("#availabilityInput option[value='Media']", "availability.Media");
+  translateOption("#availabilityInput option[value='Bassa']", "availability.Bassa");
+  translateOption("#availabilityInput option[value='A chiamata']", "availability.A chiamata");
+  translateOption("#customImagePlacementInput option[value='body']", "onBody");
+  translateOption("#customImagePlacementInput option[value='head']", "onFace");
+  translateOption("#customImagePlacementInput option[value='companion']", "asObject");
+  translateOption("#fragmentMaskInput option[value='rect']", "rect");
+  translateOption("#fragmentMaskInput option[value='square']", "square");
+  translateOption("#fragmentMaskInput option[value='oval']", "oval");
+  translateOption("#fragmentMaskInput option[value='diamond']", "diamond");
+  translateOption("#fragmentMaskInput option[value='torn']", "torn");
+
+  populateCollageSelects();
+}
+
+function translateOption(selector, key) {
+  const option = document.querySelector(selector);
+  if (option) {
+    option.textContent = t(key);
+  }
 }
 
 function maybeInitSupabase() {
@@ -373,7 +705,7 @@ async function loadPeopleFromSupabase() {
   state.selectedId = state.people[0]?.id ?? null;
   const message = state.people.length
     ? "Le persone arrivano dal database condiviso."
-    : "Database condiviso vuoto. Aggiungi la prima persona per popolare la mappa.";
+    : t("cloudEmpty");
   updateStatus("Cloud pubblico", currentUserLabel(), message);
   render();
 }
@@ -451,7 +783,10 @@ function render() {
   renderConnections(visiblePeople, pointMap);
   renderDetail();
   renderGallery(visiblePeople);
-  elements.mapSummary.textContent = `${visiblePeople.length} persone visibili su ${state.people.length}.`;
+  elements.mapSummary.textContent = t("visibleSummary", {
+    visible: String(visiblePeople.length),
+    total: String(state.people.length)
+  });
   const selectedPerson = state.people.find((entry) => entry.id === state.selectedId);
   const canEditSelected = selectedPerson ? canEditPerson(selectedPerson) : false;
   elements.editPersonButton.disabled = !state.selectedId || !canEditSelected;
@@ -589,42 +924,46 @@ function connectionWeight(first, second) {
   return score;
 }
 
+function availabilityLabel(value) {
+  return t(`availability.${value}`);
+}
+
 function renderDetail() {
   const person = state.people.find((entry) => entry.id === state.selectedId);
   if (!person) {
     elements.detailCard.innerHTML = `
       <div class="empty-state">
-        Nessuna persona selezionata. Aggiungi una nuova persona oppure usa i filtri per esplorare la costellazione.
+        ${escapeHtml(t("noSelection"))}
       </div>
     `;
     return;
   }
 
   const zone = getZone(person.closeness);
-  const owner = person.owner_email ? `<span class="pill">Scheda di ${escapeHtml(person.owner_email)}</span>` : "";
-  const hidden = state.isAdmin && person.is_visible === false ? `<span class="pill">Nascosta</span>` : "";
+  const owner = person.owner_email ? `<span class="pill">${escapeHtml(person.owner_email)}</span>` : "";
+  const hidden = state.isAdmin && person.is_visible === false ? `<span class="pill">${escapeHtml(t("hide"))}</span>` : "";
 
   elements.detailCard.innerHTML = `
     <div class="detail-top">
       <div class="detail-avatar">${buildCollageSVG(person.collage)}</div>
       <div>
         <h3 class="detail-name">${escapeHtml(person.name)}</h3>
-        <p class="detail-role">${escapeHtml(person.role || "Persona della compagnia")}</p>
+        <p class="detail-role">${escapeHtml(person.role || t("personFallback"))}</p>
       </div>
       <div class="pill-row">
         <span class="pill">${zoneLabel(zone)}</span>
-        <span class="pill">Disponibilita ${escapeHtml(person.availability)}</span>
-        <span class="pill">Vicino al centro: ${person.closeness}/100</span>
+        <span class="pill">${escapeHtml(t("availabilityPrefix"))} ${escapeHtml(availabilityLabel(person.availability))}</span>
+        <span class="pill">${escapeHtml(t("centerPrefix"))}: ${person.closeness}/100</span>
         ${hidden}
         ${owner}
       </div>
     </div>
-    ${buildDetailSection("Autoritratto", person.bio)}
-    ${buildDetailSection("Desideri", person.desire)}
-    ${buildDetailSection("Cosa offre", person.offers)}
-    ${buildDetailSection("Bisogni", person.needs)}
-    ${buildDetailSection("Talenti e competenze", person.talents)}
-    ${buildDetailSection("Parole chiave", person.tags)}
+    ${buildDetailSection(t("selfPortrait"), person.bio)}
+    ${buildDetailSection(t("desires"), person.desire)}
+    ${buildDetailSection(t("offersTitle"), person.offers)}
+    ${buildDetailSection(t("needsTitle"), person.needs)}
+    ${buildDetailSection(t("talentsTitle"), person.talents)}
+    ${buildDetailSection(t("tagsTitle"), person.tags)}
   `;
 }
 
@@ -632,7 +971,7 @@ function renderGallery(visiblePeople) {
   if (!visiblePeople.length) {
     elements.galleryGrid.innerHTML = `
       <div class="empty-state">
-        Nessuna persona corrisponde ai filtri attivi.
+        ${escapeHtml(t("noMatches"))}
       </div>
     `;
     return;
@@ -644,7 +983,7 @@ function renderGallery(visiblePeople) {
         <button type="button" data-gallery-id="${person.id}">
           <div class="collage-thumb">${buildCollageSVG(person.collage)}</div>
           <h3>${escapeHtml(person.name)}</h3>
-          <p>${escapeHtml(person.role || "Persona della compagnia")}</p>
+          <p>${escapeHtml(person.role || t("personFallback"))}</p>
         </button>
       </article>
     `)
@@ -673,7 +1012,7 @@ function buildDetailSection(title, value) {
 }
 
 function openEditorWithAccess(personId = null) {
-  const action = personId ? "modificare questo pupazzo" : "creare un nuovo pupazzo";
+  const action = personId ? t("actionEdit") : t("actionCreate");
   if (!requestAccessCode(action)) {
     return;
   }
@@ -684,14 +1023,14 @@ function openEditor(personId = null) {
   state.editorId = personId;
   const person = state.people.find((entry) => entry.id === personId) || createEmptyPerson();
   if (personId && !canEditPerson(person)) {
-    updateStatus(currentModeLabel(), currentUserLabel(), "Inserisci il codice laboratorio per modificare le schede pubblicate.");
+    updateStatus(currentModeLabel(), currentUserLabel(), t("editNeedsCode"));
     return;
   }
   state.editorCollage = normalizeEditorCollage(person.collage);
   state.activeFragmentId = "library:head";
   state.editMode = "move";
 
-  elements.dialogTitle.textContent = personId ? "Modifica persona" : "Nuova persona";
+  elements.dialogTitle.textContent = personId ? t("editPerson") : t("newPerson");
   elements.nameInput.value = person.name;
   elements.roleInput.value = person.role;
   elements.bioInput.value = person.bio;
@@ -794,12 +1133,12 @@ async function handleDeletePerson() {
   if (!state.editorId) {
     return;
   }
-  if (!requestAccessCode("cancellare questo pupazzo")) {
+  if (!requestAccessCode(t("actionDelete"))) {
     return;
   }
 
   const person = state.people.find((entry) => entry.id === state.editorId);
-  const confirmed = window.confirm(`Eliminare ${person?.name || "questa persona"}?`);
+  const confirmed = window.confirm(t("confirmDelete", { name: person?.name || t("thisPerson") }));
   if (!confirmed) {
     return;
   }
@@ -827,12 +1166,12 @@ async function handleHidePerson() {
   if (!state.editorId) {
     return;
   }
-  if (!requestAccessCode("nascondere questo pupazzo")) {
+  if (!requestAccessCode(t("actionHide"))) {
     return;
   }
 
   const person = state.people.find((entry) => entry.id === state.editorId);
-  const confirmed = window.confirm(`Nascondere ${person?.name || "questa persona"} dalla mappa pubblica?`);
+  const confirmed = window.confirm(t("confirmHide", { name: person?.name || t("thisPerson") }));
   if (!confirmed) {
     return;
   }
@@ -872,7 +1211,7 @@ function exportPeople() {
 }
 
 function handleImportButtonClick() {
-  if (!requestAccessCode("caricare un backup JSON")) {
+  if (!requestAccessCode(t("actionImport"))) {
     return;
   }
   elements.importFileInput.value = "";
@@ -888,12 +1227,12 @@ async function handleImportFileSelected(event) {
   try {
     const importedPeople = parseImportedPeople(await file.text());
     if (!importedPeople.length) {
-      updateStatus(currentModeLabel(), currentUserLabel(), "Il file JSON non contiene profili validi.");
+      updateStatus(currentModeLabel(), currentUserLabel(), t("importEmpty"));
       return;
     }
 
     const confirmed = window.confirm(
-      `Caricare ${importedPeople.length} profili dal JSON? La mappa corrente verra sostituita.`
+      t("confirmImport", { count: String(importedPeople.length) })
     );
     if (!confirmed) {
       return;
@@ -910,10 +1249,10 @@ async function handleImportFileSelected(event) {
 
     state.people = importedPeople;
     state.selectedId = state.people[0]?.id ?? null;
-    updateStatus(currentModeLabel(), currentUserLabel(), "Backup JSON caricato nella mappa.");
+    updateStatus(currentModeLabel(), currentUserLabel(), t("importOk"));
     render();
   } catch (error) {
-    updateStatus(currentModeLabel(), currentUserLabel(), `JSON non valido: ${error.message}`);
+    updateStatus(currentModeLabel(), currentUserLabel(), t("invalidJson", { message: error.message }));
   }
 }
 
@@ -973,7 +1312,7 @@ async function replaceSupabasePeople(people) {
 }
 
 function resetToDemo() {
-  const confirmed = window.confirm("Ripristinare i dati demo? I dati locali verranno sostituiti.");
+  const confirmed = window.confirm(t("resetConfirm"));
   if (!confirmed) {
     return;
   }
@@ -993,7 +1332,15 @@ function populateCollageSelects() {
 }
 
 function populateSelect(select, options) {
-  select.innerHTML = options.map((option) => `<option value="${option.id}">${escapeHtml(option.label)}</option>`).join("");
+  const currentValue = select.value;
+  select.innerHTML = options.map((option) => {
+    const translatedLabel = t(`catalog.${option.id}`);
+    const label = translatedLabel === `catalog.${option.id}` ? option.label : translatedLabel;
+    return `<option value="${option.id}">${escapeHtml(label)}</option>`;
+  }).join("");
+  if (currentValue) {
+    select.value = currentValue;
+  }
 }
 
 function renderCollagePreviewFromForm() {
@@ -1029,10 +1376,162 @@ async function handleCustomImageSelected(event) {
     return;
   }
 
-  const fragments = await Promise.all(files.map(createFragmentFromFile));
-  state.editorCollage.fragments.push(...fragments);
-  state.activeFragmentId = fragments.at(-1) ? `fragment:${fragments.at(-1).id}` : state.activeFragmentId;
+  const file = files[0];
+  const src = await readFileAsDataUrl(file);
+  state.pendingFragment = {
+    id: crypto.randomUUID(),
+    name: file.name || "Frammento",
+    src
+  };
   elements.customImageInput.value = "";
+  openFragmentCropDialog();
+}
+
+function openFragmentCropDialog() {
+  if (!state.pendingFragment) {
+    return;
+  }
+  elements.fragmentMaskInput.value = "rect";
+  elements.fragmentCropXInput.value = "0";
+  elements.fragmentCropYInput.value = "0";
+  elements.fragmentCropZoomInput.value = "100";
+  updateFragmentCropPreview();
+  elements.fragmentCropDialog.showModal();
+}
+
+function openFragmentCropDialogForExisting(fragment) {
+  if (!fragment) {
+    return;
+  }
+  state.editingFragmentId = fragment.id;
+  state.pendingFragment = {
+    id: fragment.id,
+    name: fragment.name || "Frammento",
+    src: fragment.src
+  };
+  const isSquare = fragment.mask === "rect" && Math.abs(fragment.width - fragment.height) <= 2;
+  elements.fragmentMaskInput.value = isSquare ? "square" : fragment.mask || "rect";
+  elements.fragmentCropXInput.value = String(Math.round(fragment.cropX || 0));
+  elements.fragmentCropYInput.value = String(Math.round(fragment.cropY || 0));
+  elements.fragmentCropZoomInput.value = String(Math.round((fragment.cropScale || 1) * 100));
+  updateFragmentCropPreview();
+  elements.fragmentCropDialog.showModal();
+}
+
+function closeFragmentCropDialog() {
+  elements.fragmentCropDialog.close();
+  state.pendingFragment = null;
+  state.editingFragmentId = null;
+}
+
+function updateFragmentCropPreview() {
+  if (!state.pendingFragment) {
+    return;
+  }
+  const cropX = Number(elements.fragmentCropXInput.value);
+  const cropY = Number(elements.fragmentCropYInput.value);
+  const zoom = Number(elements.fragmentCropZoomInput.value);
+  const mask = elements.fragmentMaskInput.value;
+  elements.fragmentCropPreview.className = `fragment-crop-preview crop-mask-${mask}`;
+  elements.fragmentCropPreview.style.backgroundImage = `url("${state.pendingFragment.src}")`;
+  elements.fragmentCropPreview.style.backgroundSize = `${zoom}% ${zoom}%`;
+  elements.fragmentCropPreview.style.backgroundPosition = `${50 + cropX}% ${50 + cropY}%`;
+}
+
+function handleFragmentCropPointerDown(event) {
+  if (!state.pendingFragment) {
+    return;
+  }
+  event.preventDefault();
+  elements.fragmentCropPreview.setPointerCapture?.(event.pointerId);
+  state.cropDragState = {
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    baseCropX: Number(elements.fragmentCropXInput.value),
+    baseCropY: Number(elements.fragmentCropYInput.value),
+    scaleX: 160 / Math.max(1, elements.fragmentCropPreview.clientWidth),
+    scaleY: 160 / Math.max(1, elements.fragmentCropPreview.clientHeight)
+  };
+  window.addEventListener("pointermove", handleFragmentCropPointerMove);
+  window.addEventListener("pointerup", handleFragmentCropPointerUp);
+}
+
+function handleFragmentCropPointerMove(event) {
+  if (!state.cropDragState) {
+    return;
+  }
+  const nextX = clamp(
+    state.cropDragState.baseCropX - (event.clientX - state.cropDragState.startX) * state.cropDragState.scaleX,
+    -80,
+    80
+  );
+  const nextY = clamp(
+    state.cropDragState.baseCropY - (event.clientY - state.cropDragState.startY) * state.cropDragState.scaleY,
+    -80,
+    80
+  );
+  elements.fragmentCropXInput.value = String(Math.round(nextX));
+  elements.fragmentCropYInput.value = String(Math.round(nextY));
+  updateFragmentCropPreview();
+}
+
+function handleFragmentCropPointerUp(event) {
+  if (state.cropDragState?.pointerId !== undefined) {
+    elements.fragmentCropPreview.releasePointerCapture?.(state.cropDragState.pointerId);
+  }
+  state.cropDragState = null;
+  window.removeEventListener("pointermove", handleFragmentCropPointerMove);
+  window.removeEventListener("pointerup", handleFragmentCropPointerUp);
+}
+
+function confirmFragmentCrop(event) {
+  event.preventDefault();
+  if (!state.pendingFragment || !state.editorCollage) {
+    return;
+  }
+
+  const maskValue = elements.fragmentMaskInput.value;
+  const isSquare = maskValue === "square";
+  const fragment = {
+    id: state.pendingFragment.id,
+    name: state.pendingFragment.name,
+    src: state.pendingFragment.src,
+    x: 122,
+    y: 150,
+    width: isSquare ? 92 : 108,
+    height: isSquare ? 92 : maskValue === "rect" ? 78 : 108,
+    rotation: 0,
+    opacity: 0.92,
+    cropX: Number(elements.fragmentCropXInput.value),
+    cropY: Number(elements.fragmentCropYInput.value),
+    cropScale: Number(elements.fragmentCropZoomInput.value) / 100,
+    mask: isSquare ? "rect" : maskValue,
+    zIndex: Math.max(50, getMaxFragmentZIndex() + 10)
+  };
+
+  if (state.editingFragmentId) {
+    state.editorCollage.fragments = state.editorCollage.fragments.map((entry) => (
+      entry.id === state.editingFragmentId
+        ? {
+            ...entry,
+            width: fragment.width,
+            height: fragment.height,
+            cropX: fragment.cropX,
+            cropY: fragment.cropY,
+            cropScale: fragment.cropScale,
+            mask: fragment.mask
+          }
+        : entry
+    ));
+    state.activeFragmentId = `fragment:${state.editingFragmentId}`;
+  } else {
+    state.editorCollage.fragments.push(fragment);
+    state.activeFragmentId = `fragment:${fragment.id}`;
+  }
+  elements.fragmentCropDialog.close();
+  state.pendingFragment = null;
+  state.editingFragmentId = null;
   renderCollagePreviewFromForm();
 }
 
@@ -1066,7 +1565,7 @@ async function createFragmentFromFile(file) {
     cropY: 0,
     cropScale: 1,
     mask: "torn",
-    zIndex: (state.editorCollage?.fragments.length || 0) + 1
+        zIndex: Math.max(50, getMaxFragmentZIndex() + 10)
   };
 }
 
@@ -1107,11 +1606,13 @@ function renderFloatingToolbar() {
   const top = `${((18 + bounds.y * 0.86) / 280) * 100}%`;
   return `
     <div class="floating-toolbar" style="left:${left}; top:${top};">
-      <button type="button" data-toolbar-action="rotate-left" title="Ruota a sinistra" aria-label="Ruota a sinistra">${iconRotateLeft()}</button>
-      <button type="button" data-toolbar-action="rotate-right" title="Ruota a destra" aria-label="Ruota a destra">${iconRotateRight()}</button>
-      <button type="button" data-toolbar-action="smaller" title="Riduci" aria-label="Riduci">${iconMinus()}</button>
-      <button type="button" data-toolbar-action="larger" title="Ingrandisci" aria-label="Ingrandisci">${iconPlus()}</button>
-      <button type="button" data-toolbar-action="remove" title="Elimina" aria-label="Elimina">${iconTrash()}</button>
+      <button type="button" data-toolbar-action="rotate-left" title="${escapeHtml(t("rotateLeft"))}" aria-label="${escapeHtml(t("rotateLeft"))}">${iconRotateLeft()}</button>
+      <button type="button" data-toolbar-action="rotate-right" title="${escapeHtml(t("rotateRight"))}" aria-label="${escapeHtml(t("rotateRight"))}">${iconRotateRight()}</button>
+      <button type="button" data-toolbar-action="smaller" title="${escapeHtml(t("smaller"))}" aria-label="${escapeHtml(t("smaller"))}">${iconMinus()}</button>
+      <button type="button" data-toolbar-action="larger" title="${escapeHtml(t("larger"))}" aria-label="${escapeHtml(t("larger"))}">${iconPlus()}</button>
+      <button type="button" data-toolbar-action="backward" title="${escapeHtml(t("backward"))}" aria-label="${escapeHtml(t("backward"))}">${iconBackward()}</button>
+      <button type="button" data-toolbar-action="forward" title="${escapeHtml(t("forward"))}" aria-label="${escapeHtml(t("forward"))}">${iconForward()}</button>
+      <button type="button" data-toolbar-action="remove" title="${escapeHtml(t("delete"))}" aria-label="${escapeHtml(t("delete"))}">${iconTrash()}</button>
     </div>
   `;
 }
@@ -1126,6 +1627,8 @@ function bindFloatingToolbar() {
       if (action === "rotate-right") transformActiveLayer({ rotationDelta: 12 });
       if (action === "smaller") transformActiveLayer({ scaleFactor: 0.9 });
       if (action === "larger") transformActiveLayer({ scaleFactor: 1.1 });
+      if (action === "backward") moveActiveLayer(-1);
+      if (action === "forward") moveActiveLayer(1);
     });
   });
 }
@@ -1149,6 +1652,54 @@ function transformActiveLayer({ rotationDelta = 0, scaleFactor = 1 }) {
     rotation: clamp((transform.rotation || 0) + rotationDelta, -360, 360),
     scale: clamp((transform.scale || 1) * scaleFactor, 0.3, 2.2)
   });
+}
+
+function moveActiveLayer(direction) {
+  if (!state.editorCollage || !state.activeFragmentId) {
+    return;
+  }
+
+  const layers = getLayerOrderEntries();
+  const currentIndex = layers.findIndex((layer) => layer.id === state.activeFragmentId);
+  const targetIndex = currentIndex + direction;
+  if (currentIndex < 0 || targetIndex < 0 || targetIndex >= layers.length) {
+    return;
+  }
+
+  const current = layers[currentIndex];
+  const target = layers[targetIndex];
+  setLayerZIndex(current.id, target.zIndex);
+  setLayerZIndex(target.id, current.zIndex);
+  renderCollagePreviewFromForm();
+}
+
+function getLayerOrderEntries() {
+  const transforms = state.editorCollage?.transforms || defaultLibraryTransforms();
+  const libraryLayers = ["element", "body", "companion", "head"].map((key) => ({
+    id: `library:${key}`,
+    zIndex: Number(transforms[key]?.zIndex ?? defaultLibraryTransforms()[key].zIndex)
+  }));
+  const fragmentLayers = (state.editorCollage?.fragments || []).map((fragment) => ({
+    id: `fragment:${fragment.id}`,
+    zIndex: Number(fragment.zIndex || 50)
+  }));
+  return [...libraryLayers, ...fragmentLayers].sort((left, right) => left.zIndex - right.zIndex);
+}
+
+function setLayerZIndex(layerId, zIndex) {
+  if (layerId.startsWith("library:")) {
+    const key = layerId.replace("library:", "");
+    state.editorCollage.transforms[key] = {
+      ...getLibraryTransform(key),
+      zIndex
+    };
+    return;
+  }
+  const fragmentId = layerId.replace("fragment:", "");
+  const fragment = state.editorCollage.fragments.find((entry) => entry.id === fragmentId);
+  if (fragment) {
+    fragment.zIndex = zIndex;
+  }
 }
 
 function getSelectedLayerBounds() {
@@ -1205,10 +1756,10 @@ function createEmptyPerson() {
 
 function defaultLibraryTransforms() {
   return {
-    element: { x: 0, y: 0, scale: 1, rotation: 0, visible: true },
-    body: { x: 0, y: 0, scale: 1, rotation: 0, visible: true },
-    head: { x: 0, y: 0, scale: 1, rotation: 0, visible: true },
-    companion: { x: 0, y: 0, scale: 1, rotation: 0, visible: true }
+    element: { x: 0, y: 0, scale: 1, rotation: 0, visible: true, zIndex: 10 },
+    body: { x: 0, y: 0, scale: 1, rotation: 0, visible: true, zIndex: 20 },
+    companion: { x: 0, y: 0, scale: 1, rotation: 0, visible: true, zIndex: 30 },
+    head: { x: 0, y: 0, scale: 1, rotation: 0, visible: true, zIndex: 40 }
   };
 }
 
@@ -1248,8 +1799,10 @@ function normalizeEditorCollage(collage) {
     ...collage,
     element: collage?.element || mapLegacyAuraToElement(collage?.aura) || base.element,
     transforms: {
-      ...base.transforms,
-      ...(collage?.transforms || {})
+      element: { ...base.transforms.element, ...(collage?.transforms?.element || {}) },
+      body: { ...base.transforms.body, ...(collage?.transforms?.body || {}) },
+      companion: { ...base.transforms.companion, ...(collage?.transforms?.companion || {}) },
+      head: { ...base.transforms.head, ...(collage?.transforms?.head || {}) }
     },
     fragments: [...fragments, ...legacy]
       .map((fragment, index) => ({
@@ -1323,7 +1876,7 @@ function duplicateActiveFragment() {
     name: `${fragment.name || "Frammento"} copia`,
     x: clamp(fragment.x + 12, 20, 220),
     y: clamp(fragment.y + 12, 20, 220),
-    zIndex: getMaxFragmentZIndex() + 1
+    zIndex: Math.max(50, getMaxFragmentZIndex() + 10)
   };
   state.editorCollage.fragments.push(clone);
   state.activeFragmentId = `fragment:${clone.id}`;
@@ -1335,8 +1888,7 @@ function moveActiveFragment(direction) {
   if (!fragment) {
     return;
   }
-  fragment.zIndex = clamp((fragment.zIndex || 1) + direction, 1, getMaxFragmentZIndex() + 1);
-  normalizeFragmentZOrder();
+  fragment.zIndex = clamp((fragment.zIndex || 50) + direction * 10, 1, 99);
   renderCollagePreviewFromForm();
 }
 
@@ -1347,7 +1899,7 @@ function normalizeFragmentZOrder() {
   state.editorCollage.fragments
     .sort((left, right) => (left.zIndex || 1) - (right.zIndex || 1))
     .forEach((fragment, index) => {
-      fragment.zIndex = index + 1;
+      fragment.zIndex = Number(fragment.zIndex || (50 + index * 10));
     });
 }
 
@@ -1392,6 +1944,17 @@ function getStagePoint(event, stage) {
 }
 
 function handlePreviewPointerDown(event) {
+  const doubleClickLayer = event.target.closest("[data-layer-id]");
+  if (event.detail >= 2 && doubleClickLayer?.dataset.layerId?.startsWith("fragment:")) {
+    event.preventDefault();
+    const fragmentId = doubleClickLayer.dataset.layerId.replace("fragment:", "");
+    const fragment = state.editorCollage?.fragments.find((entry) => entry.id === fragmentId);
+    state.activeFragmentId = doubleClickLayer.dataset.layerId;
+    renderCollagePreviewFromForm();
+    openFragmentCropDialogForExisting(fragment);
+    return;
+  }
+
   const handle = event.target.closest("[data-handle-action]");
   if (handle && state.editorCollage) {
     event.preventDefault();
@@ -1566,10 +2129,10 @@ function getZone(closeness) {
 
 function zoneLabel(zone) {
   return {
-    core: "Nucleo vicino",
-    middle: "Persona attiva",
-    edge: "Margine fertile"
-  }[zone] || "Persona";
+    core: t("zoneCore"),
+    middle: t("zoneMiddle"),
+    edge: t("zoneEdge")
+  }[zone] || t("personFallback");
 }
 
 function getMapPosition(person, index, total) {
@@ -1672,8 +2235,20 @@ function buildCollageSVG(collage, options = {}) {
   const editMode = options.editMode || "move";
   const fragments = Array.isArray(collage.fragments) ? collage.fragments : [];
   const transforms = collage.transforms || defaultLibraryTransforms();
+  const layerEntries = [
+    { type: "library", key: "element", variant: collage.element, zIndex: transforms.element?.zIndex ?? defaultLibraryTransforms().element.zIndex },
+    { type: "library", key: "body", variant: collage.body, zIndex: transforms.body?.zIndex ?? defaultLibraryTransforms().body.zIndex },
+    { type: "library", key: "companion", variant: collage.companion, zIndex: transforms.companion?.zIndex ?? defaultLibraryTransforms().companion.zIndex },
+    { type: "library", key: "head", variant: collage.head, zIndex: transforms.head?.zIndex ?? defaultLibraryTransforms().head.zIndex },
+    ...fragments.map((fragment) => ({ type: "fragment", fragment, zIndex: Number(fragment.zIndex || 50) }))
+  ].sort((left, right) => left.zIndex - right.zIndex);
+  const renderedLayers = layerEntries.map((entry) => (
+    entry.type === "library"
+      ? renderLibraryLayer(entry.key, entry.variant, transforms[entry.key], interactive, selectedLayerId, editMode)
+      : renderCollageFragment(entry.fragment, interactive, selectedLayerId, editMode)
+  )).join("");
   return `
-    <svg class="collage-svg" viewBox="0 0 280 280" role="img" aria-label="Pupazzo digitale">
+    <svg class="collage-svg" viewBox="0 0 280 280" role="img" aria-label="${escapeHtml(t("puppet"))}">
       <g transform="translate(18 18) scale(0.86)">
       <defs>
         <linearGradient id="bgWash" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -1778,11 +2353,7 @@ function buildCollageSVG(collage, options = {}) {
           <ellipse cx="138" cy="164" rx="54" ry="34" fill="#c4dee2"></ellipse>
         </g>
       ` : ""}
-      ${renderLibraryLayer("element", collage.element, transforms.element, interactive, selectedLayerId, editMode)}
-      ${renderLibraryLayer("body", collage.body, transforms.body, interactive, selectedLayerId, editMode)}
-      ${renderLibraryLayer("companion", collage.companion, transforms.companion, interactive, selectedLayerId, editMode)}
-      ${renderLibraryLayer("head", collage.head, transforms.head, interactive, selectedLayerId, editMode)}
-      ${includeFragments ? renderCollageFragments(fragments, interactive, selectedLayerId, editMode) : ""}
+      ${includeFragments ? renderedLayers : layerEntries.filter((entry) => entry.type === "library").map((entry) => renderLibraryLayer(entry.key, entry.variant, transforms[entry.key], interactive, selectedLayerId, editMode)).join("")}
       <ellipse cx="122" cy="214" rx="64" ry="12" fill="rgba(77, 50, 40, 0.10)"></ellipse>
       </g>
     </svg>
@@ -1852,55 +2423,46 @@ function renderCollageFragments(fragments, interactive = false, selectedLayerId 
   return fragments
     .slice()
     .sort((left, right) => (left.zIndex || 1) - (right.zIndex || 1))
-    .map((fragment) => {
-      const clipId = `frag-${sanitizeId(fragment.id)}`;
-      const width = fragment.width * fragment.cropScale;
-      const height = fragment.height * fragment.cropScale;
-      const x = fragment.x - width / 2 + (fragment.cropX / 100) * fragment.width;
-      const y = fragment.y - height / 2 + (fragment.cropY / 100) * fragment.height;
-      return `
-        <g data-layer-id="${interactive ? `fragment:${fragment.id}` : ""}" transform="rotate(${fragment.rotation} ${fragment.x} ${fragment.y})" opacity="${fragment.opacity}" ${interactive ? `style="cursor:grab;"` : ""}>
-          <image
-            href="${escapeHtml(fragment.src)}"
-            x="${x}"
-            y="${y}"
-            width="${width}"
-            height="${height}"
-            preserveAspectRatio="xMidYMid slice"
-            clip-path="url(#${clipId})"
-          ></image>
-          ${interactive && selectedLayerId === `fragment:${fragment.id}` ? renderSelectionHandles({
-            x: fragment.x - fragment.width / 2,
-            y: fragment.y - fragment.height / 2,
-            width: fragment.width,
-            height: fragment.height
-          }, `fragment:${fragment.id}`, editMode, true) : ""}
-        </g>
-      `;
-    })
+    .map((fragment) => renderCollageFragment(fragment, interactive, selectedLayerId, editMode))
     .join("");
+}
+
+function renderCollageFragment(fragment, interactive = false, selectedLayerId = "", editMode = "move") {
+  const clipId = `frag-${sanitizeId(fragment.id)}`;
+  const imageWidth = fragment.width * fragment.cropScale;
+  const imageHeight = fragment.height * fragment.cropScale;
+  const clipX = fragment.x - fragment.width / 2;
+  const clipY = fragment.y - fragment.height / 2;
+  const positionX = clamp(50 + Number(fragment.cropX || 0), 0, 100) / 100;
+  const positionY = clamp(50 + Number(fragment.cropY || 0), 0, 100) / 100;
+  const x = clipX + (fragment.width - imageWidth) * positionX;
+  const y = clipY + (fragment.height - imageHeight) * positionY;
+  return `
+    <g data-layer-id="${interactive ? `fragment:${fragment.id}` : ""}" transform="rotate(${fragment.rotation} ${fragment.x} ${fragment.y})" opacity="${fragment.opacity}" ${interactive ? `style="cursor:grab;"` : ""}>
+      <image
+        href="${escapeHtml(fragment.src)}"
+        x="${x}"
+        y="${y}"
+        width="${imageWidth}"
+        height="${imageHeight}"
+        preserveAspectRatio="none"
+        clip-path="url(#${clipId})"
+      ></image>
+      ${interactive && selectedLayerId === `fragment:${fragment.id}` ? renderSelectionHandles({
+        x: fragment.x - fragment.width / 2,
+        y: fragment.y - fragment.height / 2,
+        width: fragment.width,
+        height: fragment.height
+      }, `fragment:${fragment.id}`, editMode, true) : ""}
+    </g>
+  `;
 }
 
 function renderSelectionHandles(bounds, layerId, editMode, isFragment) {
   const left = bounds.x;
   const top = bounds.y;
-  const right = bounds.x + bounds.width;
-  const bottom = bounds.y + bounds.height;
-  const cx = bounds.x + bounds.width / 2;
   return `
-    <rect x="${left}" y="${top}" width="${bounds.width}" height="${bounds.height}" rx="10" fill="none" stroke="rgba(187,88,53,0.74)" stroke-dasharray="6 4" stroke-width="2"></rect>
-    <g class="editor-handle editor-handle-resize" data-layer-id="${layerId}" data-handle-action="resize" transform="translate(${right} ${bottom})">
-      <circle r="11" fill="#fff7ef" stroke="#bb5835" stroke-width="2.5"></circle>
-      <path d="M-4 4 L4 -4 M1 -4 H4 V-1 M-4 1 V4 H-1" stroke="#bb5835" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
-    </g>
-    <g class="editor-handle editor-handle-rotate" data-layer-id="${layerId}" data-handle-action="rotate" transform="translate(${cx} ${top - 20})">
-      <circle r="10" fill="#2d7f83" stroke="#fff7ef" stroke-width="2.5"></circle>
-      <path d="M-3 3 A5 5 0 1 1 4 -2" stroke="#fff7ef" stroke-width="2" fill="none" stroke-linecap="round"></path>
-      <path d="M2 -5 L5 -2 L1 -1" fill="none" stroke="#fff7ef" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-    </g>
-    <text x="${right - 18}" y="${bottom + 20}" text-anchor="end" font-size="10" font-weight="600" fill="rgba(187,88,53,0.82)">scala</text>
-    <text x="${cx}" y="${top - 34}" text-anchor="middle" font-size="10" font-weight="600" fill="rgba(45,127,131,0.9)">ruota</text>
-    ${isFragment ? `<text x="${cx}" y="${bottom + 36}" text-anchor="middle" font-size="10" fill="rgba(47,33,30,0.75)">${editMode === "crop" ? "ritaglio" : "sposta"}</text>` : ""}
+    <rect data-layer-id="${layerId}" x="${left}" y="${top}" width="${bounds.width}" height="${bounds.height}" rx="10" fill="none" stroke="rgba(187,88,53,0.74)" stroke-dasharray="6 4" stroke-width="2" pointer-events="none"></rect>
   `;
 }
 
@@ -2191,6 +2753,9 @@ function updateAuthUI() {
 }
 
 function updateStatus(mode, auth, message) {
+  if (!elements.storageModeLabel || !elements.authStatusLabel || !elements.syncStatusLabel) {
+    return;
+  }
   elements.storageModeLabel.textContent = mode;
   elements.authStatusLabel.textContent = auth;
   elements.syncStatusLabel.textContent = message;
@@ -2234,7 +2799,7 @@ function requestAccessCode(action) {
     return true;
   }
 
-  const enteredCode = window.prompt(`Inserisci il codice laboratorio per ${action}.`);
+  const enteredCode = window.prompt(t("codePrompt", { action }));
   if (enteredCode === null) {
     return false;
   }
@@ -2243,7 +2808,7 @@ function requestAccessCode(action) {
     return true;
   }
 
-  updateStatus(currentModeLabel(), currentUserLabel(), "Codice laboratorio non corretto.");
+  updateStatus(currentModeLabel(), currentUserLabel(), t("wrongCode"));
   return false;
 }
 
