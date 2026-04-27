@@ -759,7 +759,8 @@ textarea:focus {
   padding: 11px 14px;
   border-radius: 999px;
   color: #fff8f1;
-  background: linear-gradient(135deg, var(--terracotta), #8f2d25);
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), #8f2d25);
   box-shadow: 0 10px 22px rgba(157, 55, 47, 0.18);
 }
 

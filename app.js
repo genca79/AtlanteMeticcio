@@ -583,7 +583,7 @@ function applyTranslations() {
   setLabelText("#bodyInput", "body");
   setLabelText("#elementInput", "element");
   setLabelText("#companionInput", "object");
-  setLabelText("#customImageInput", "uploadImages");
+  setText("#customImageTriggerLabel", "uploadImages");
   setLabelText("#customImagePlacementInput", "placeFragment");
   setLabelText("#customImageScaleInput", "fragmentScale");
   setLabelText("#customImageRotationInput", "fragmentRotation");
