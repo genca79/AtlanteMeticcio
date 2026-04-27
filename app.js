@@ -141,28 +141,32 @@ Object.assign(translations.it, {
   "catalog.moon": "Luna", "catalog.shell": "Conchiglia", "catalog.seed": "Seme", "catalog.stone": "Sasso", "catalog.mask": "Maschera", "catalog.star": "Stella",
   "catalog.thread": "Tessuto", "catalog.sea": "Mare", "catalog.leaf": "Foglia", "catalog.root": "Radice", "catalog.metal": "Lamiera", "catalog.sail": "Vela",
   "catalog.water": "Acqua", "catalog.earth": "Terra", "catalog.air": "Aria", "catalog.fire": "Fuoco", "catalog.paper": "Carta", "catalog.shadow": "Ombra",
-  "catalog.branch": "Ramo", "catalog.lantern": "Lanterna", "catalog.kite": "Aquilone", "catalog.tube": "Tubo", "catalog.nest": "Nido", "catalog.key": "Chiave"
+  "catalog.branch": "Ramo", "catalog.lantern": "Lanterna", "catalog.kite": "Aquilone", "catalog.tube": "Tubo", "catalog.nest": "Nido", "catalog.key": "Chiave",
+  "catalog.circle": "Cerchio", "catalog.rectangle": "Rettangolo", "catalog.square": "Quadrato", "catalog.triangle": "Triangolo"
 });
 Object.assign(translations.en, {
   "availability.Alta": "High", "availability.Media": "Medium", "availability.Bassa": "Low", "availability.A chiamata": "On call",
   "catalog.moon": "Moon", "catalog.shell": "Shell", "catalog.seed": "Seed", "catalog.stone": "Stone", "catalog.mask": "Mask", "catalog.star": "Star",
   "catalog.thread": "Fabric", "catalog.sea": "Sea", "catalog.leaf": "Leaf", "catalog.root": "Root", "catalog.metal": "Sheet metal", "catalog.sail": "Sail",
   "catalog.water": "Water", "catalog.earth": "Earth", "catalog.air": "Air", "catalog.fire": "Fire", "catalog.paper": "Paper", "catalog.shadow": "Shadow",
-  "catalog.branch": "Branch", "catalog.lantern": "Lantern", "catalog.kite": "Kite", "catalog.tube": "Tube", "catalog.nest": "Nest", "catalog.key": "Key"
+  "catalog.branch": "Branch", "catalog.lantern": "Lantern", "catalog.kite": "Kite", "catalog.tube": "Tube", "catalog.nest": "Nest", "catalog.key": "Key",
+  "catalog.circle": "Circle", "catalog.rectangle": "Rectangle", "catalog.square": "Square", "catalog.triangle": "Triangle"
 });
 Object.assign(translations.fr, {
   "availability.Alta": "Haute", "availability.Media": "Moyenne", "availability.Bassa": "Basse", "availability.A chiamata": "Sur appel",
   "catalog.moon": "Lune", "catalog.shell": "Coquillage", "catalog.seed": "Graine", "catalog.stone": "Pierre", "catalog.mask": "Masque", "catalog.star": "Etoile",
   "catalog.thread": "Tissu", "catalog.sea": "Mer", "catalog.leaf": "Feuille", "catalog.root": "Racine", "catalog.metal": "Tole", "catalog.sail": "Voile",
   "catalog.water": "Eau", "catalog.earth": "Terre", "catalog.air": "Air", "catalog.fire": "Feu", "catalog.paper": "Papier", "catalog.shadow": "Ombre",
-  "catalog.branch": "Branche", "catalog.lantern": "Lanterne", "catalog.kite": "Cerf-volant", "catalog.tube": "Tube", "catalog.nest": "Nid", "catalog.key": "Cle"
+  "catalog.branch": "Branche", "catalog.lantern": "Lanterne", "catalog.kite": "Cerf-volant", "catalog.tube": "Tube", "catalog.nest": "Nid", "catalog.key": "Cle",
+  "catalog.circle": "Cercle", "catalog.rectangle": "Rectangle", "catalog.square": "Carre", "catalog.triangle": "Triangle"
 });
 Object.assign(translations.ar, {
   "availability.Alta": "عال", "availability.Media": "متوسط", "availability.Bassa": "منخفض", "availability.A chiamata": "عند الطلب",
   "catalog.moon": "قمر", "catalog.shell": "صدفة", "catalog.seed": "بذرة", "catalog.stone": "حجر", "catalog.mask": "قناع", "catalog.star": "نجمة",
   "catalog.thread": "قماش", "catalog.sea": "بحر", "catalog.leaf": "ورقة", "catalog.root": "جذر", "catalog.metal": "معدن", "catalog.sail": "شراع",
   "catalog.water": "ماء", "catalog.earth": "أرض", "catalog.air": "هواء", "catalog.fire": "نار", "catalog.paper": "ورق", "catalog.shadow": "ظل",
-  "catalog.branch": "غصن", "catalog.lantern": "فانوس", "catalog.kite": "طائرة ورقية", "catalog.tube": "أنبوب", "catalog.nest": "عش", "catalog.key": "مفتاح"
+  "catalog.branch": "غصن", "catalog.lantern": "فانوس", "catalog.kite": "طائرة ورقية", "catalog.tube": "أنبوب", "catalog.nest": "عش", "catalog.key": "مفتاح",
+  "catalog.circle": "دائرة", "catalog.rectangle": "مستطيل", "catalog.square": "مربع", "catalog.triangle": "مثلث"
 });
 
 const collageCatalog = {
@@ -172,7 +176,11 @@ const collageCatalog = {
     { id: "seed", label: "Seme" },
     { id: "stone", label: "Sasso" },
     { id: "mask", label: "Maschera" },
-    { id: "star", label: "Stella" }
+    { id: "star", label: "Stella" },
+    { id: "circle", label: "Cerchio" },
+    { id: "rectangle", label: "Rettangolo" },
+    { id: "square", label: "Quadrato" },
+    { id: "triangle", label: "Triangolo" }
   ],
   body: [
     { id: "thread", label: "Tessuto" },
@@ -180,7 +188,11 @@ const collageCatalog = {
     { id: "leaf", label: "Foglia" },
     { id: "root", label: "Radice" },
     { id: "metal", label: "Lamiera" },
-    { id: "sail", label: "Vela" }
+    { id: "sail", label: "Vela" },
+    { id: "circle", label: "Cerchio" },
+    { id: "rectangle", label: "Rettangolo" },
+    { id: "square", label: "Quadrato" },
+    { id: "triangle", label: "Triangolo" }
   ],
   element: [
     { id: "water", label: "Acqua" },
@@ -188,7 +200,11 @@ const collageCatalog = {
     { id: "air", label: "Aria" },
     { id: "fire", label: "Fuoco" },
     { id: "paper", label: "Carta" },
-    { id: "shadow", label: "Ombra" }
+    { id: "shadow", label: "Ombra" },
+    { id: "circle", label: "Cerchio" },
+    { id: "rectangle", label: "Rettangolo" },
+    { id: "square", label: "Quadrato" },
+    { id: "triangle", label: "Triangolo" }
   ],
   companion: [
     { id: "branch", label: "Ramo" },
@@ -196,9 +212,16 @@ const collageCatalog = {
     { id: "kite", label: "Aquilone" },
     { id: "tube", label: "Tubo" },
     { id: "nest", label: "Nido" },
-    { id: "key", label: "Chiave" }
+    { id: "key", label: "Chiave" },
+    { id: "circle", label: "Cerchio" },
+    { id: "rectangle", label: "Rettangolo" },
+    { id: "square", label: "Quadrato" },
+    { id: "triangle", label: "Triangolo" }
   ]
 };
+
+const BASIC_SHAPE_IDS = new Set(["circle", "rectangle", "square", "triangle"]);
+const DEFAULT_SHAPE_COLOR = "#cf7150";
 
 const demoPeople = [
   {
@@ -446,6 +469,7 @@ function bindEvents() {
   ].forEach((input) => input.addEventListener("input", updateFragmentCropPreview));
   elements.fragmentCropPreview.addEventListener("pointerdown", handleFragmentCropPointerDown);
   elements.collagePreview.addEventListener("pointerdown", handlePreviewPointerDown);
+  elements.collagePreview.addEventListener("dblclick", handlePreviewDoubleClick);
   elements.collagePreview.addEventListener("wheel", handlePreviewWheel, { passive: false });
 
   [elements.headInput, elements.bodyInput, elements.elementInput, elements.companionInput].forEach((select) => {
@@ -1604,12 +1628,17 @@ function renderFloatingToolbar() {
   }
   const left = `${((18 + bounds.cx * 0.86) / 280) * 100}%`;
   const top = `${((18 + bounds.y * 0.86) / 280) * 100}%`;
+  const libraryKey = getActiveLibraryKey();
+  const colorControl = libraryKey && isBasicShapeLayer(libraryKey)
+    ? `<input type="color" class="toolbar-color-input" data-toolbar-color value="${escapeHtml(sanitizeColor(getLibraryTransform(libraryKey).color))}" title="${escapeHtml(t("chooseColor"))}" aria-label="${escapeHtml(t("chooseColor"))}">`
+    : "";
   return `
     <div class="floating-toolbar" style="left:${left}; top:${top};">
       <button type="button" data-toolbar-action="rotate-left" title="${escapeHtml(t("rotateLeft"))}" aria-label="${escapeHtml(t("rotateLeft"))}">${iconRotateLeft()}</button>
       <button type="button" data-toolbar-action="rotate-right" title="${escapeHtml(t("rotateRight"))}" aria-label="${escapeHtml(t("rotateRight"))}">${iconRotateRight()}</button>
       <button type="button" data-toolbar-action="smaller" title="${escapeHtml(t("smaller"))}" aria-label="${escapeHtml(t("smaller"))}">${iconMinus()}</button>
       <button type="button" data-toolbar-action="larger" title="${escapeHtml(t("larger"))}" aria-label="${escapeHtml(t("larger"))}">${iconPlus()}</button>
+      ${colorControl}
       <button type="button" data-toolbar-action="backward" title="${escapeHtml(t("backward"))}" aria-label="${escapeHtml(t("backward"))}">${iconBackward()}</button>
       <button type="button" data-toolbar-action="forward" title="${escapeHtml(t("forward"))}" aria-label="${escapeHtml(t("forward"))}">${iconForward()}</button>
       <button type="button" data-toolbar-action="remove" title="${escapeHtml(t("delete"))}" aria-label="${escapeHtml(t("delete"))}">${iconTrash()}</button>
@@ -1618,6 +1647,17 @@ function renderFloatingToolbar() {
 }
 
 function bindFloatingToolbar() {
+  const colorInput = elements.collagePreview.querySelector("[data-toolbar-color]");
+  if (colorInput) {
+    colorInput.addEventListener("pointerdown", (event) => event.stopPropagation());
+    colorInput.addEventListener("click", (event) => event.stopPropagation());
+    colorInput.addEventListener("input", (event) => {
+      const key = getActiveLibraryKey();
+      if (key && isBasicShapeLayer(key)) {
+        updateActiveLibraryTransform({ color: event.target.value });
+      }
+    });
+  }
   elements.collagePreview.querySelectorAll("[data-toolbar-action]").forEach((button) => {
     button.addEventListener("click", (event) => {
       event.stopPropagation();
@@ -1756,10 +1796,10 @@ function createEmptyPerson() {
 
 function defaultLibraryTransforms() {
   return {
-    element: { x: 0, y: 0, scale: 1, rotation: 0, visible: true, zIndex: 10 },
-    body: { x: 0, y: 0, scale: 1, rotation: 0, visible: true, zIndex: 20 },
-    companion: { x: 0, y: 0, scale: 1, rotation: 0, visible: true, zIndex: 30 },
-    head: { x: 0, y: 0, scale: 1, rotation: 0, visible: true, zIndex: 40 }
+    element: { x: 0, y: 0, scale: 1, rotation: 0, visible: true, zIndex: 10, color: DEFAULT_SHAPE_COLOR },
+    body: { x: 0, y: 0, scale: 1, rotation: 0, visible: true, zIndex: 20, color: DEFAULT_SHAPE_COLOR },
+    companion: { x: 0, y: 0, scale: 1, rotation: 0, visible: true, zIndex: 30, color: DEFAULT_SHAPE_COLOR },
+    head: { x: 0, y: 0, scale: 1, rotation: 0, visible: true, zIndex: 40, color: DEFAULT_SHAPE_COLOR }
   };
 }
 
@@ -1838,6 +1878,35 @@ function getActiveLibraryKey() {
     return String(state.activeFragmentId).replace("library:", "");
   }
   return null;
+}
+
+function getLibraryVariant(key) {
+  return {
+    head: elements.headInput.value,
+    body: elements.bodyInput.value,
+    element: elements.elementInput.value,
+    companion: elements.companionInput.value
+  }[key] || "";
+}
+
+function isBasicShapeLayer(key) {
+  return BASIC_SHAPE_IDS.has(getLibraryVariant(key));
+}
+
+function openShapeColorPicker(key) {
+  const input = document.createElement("input");
+  input.type = "color";
+  input.value = sanitizeColor(getLibraryTransform(key).color);
+  input.style.position = "fixed";
+  input.style.left = "-9999px";
+  input.setAttribute("aria-label", "Scegli colore");
+  document.body.append(input);
+  input.addEventListener("input", () => {
+    state.activeFragmentId = `library:${key}`;
+    updateActiveLibraryTransform({ color: input.value });
+  });
+  input.addEventListener("change", () => input.remove(), { once: true });
+  input.click();
 }
 
 function getLibraryTransform(key) {
@@ -1943,8 +2012,34 @@ function getStagePoint(event, stage) {
   };
 }
 
+function handlePreviewDoubleClick(event) {
+  const targetLayer = event.target.closest("[data-layer-id]");
+  if (!targetLayer?.dataset.layerId?.startsWith("library:")) {
+    return;
+  }
+  const key = targetLayer.dataset.layerId.replace("library:", "");
+  if (!isBasicShapeLayer(key)) {
+    return;
+  }
+  event.preventDefault();
+  event.stopPropagation();
+  state.activeFragmentId = targetLayer.dataset.layerId;
+  renderCollagePreviewFromForm();
+  openShapeColorPicker(key);
+}
+
 function handlePreviewPointerDown(event) {
   const doubleClickLayer = event.target.closest("[data-layer-id]");
+  if (event.detail >= 2 && doubleClickLayer?.dataset.layerId?.startsWith("library:")) {
+    const key = doubleClickLayer.dataset.layerId.replace("library:", "");
+    if (isBasicShapeLayer(key)) {
+      event.preventDefault();
+      state.activeFragmentId = doubleClickLayer.dataset.layerId;
+      renderCollagePreviewFromForm();
+      openShapeColorPicker(key);
+      return;
+    }
+  }
   if (event.detail >= 2 && doubleClickLayer?.dataset.layerId?.startsWith("fragment:")) {
     event.preventDefault();
     const fragmentId = doubleClickLayer.dataset.layerId.replace("fragment:", "");
@@ -2330,7 +2425,7 @@ function buildCollageSVG(collage, options = {}) {
           <path d="M86 84 C90 56, 118 40, 146 48 C170 54, 182 82, 172 108 C162 134, 134 142, 108 132 C86 122, 80 104, 86 84 Z"></path>
         </clipPath>
         <clipPath id="headClipMask">
-          <path d="M86 84 C90 56, 158 48, 170 82 C178 106, 164 130, 126 136 C96 136, 82 110, 86 84 Z"></path>
+          <path d="M82 86 C82 54, 102 42, 124 58 C148 38, 172 52, 176 84 C180 118, 158 142, 126 136 C96 144, 78 118, 82 86 Z"></path>
         </clipPath>
         <clipPath id="headClipSeed">
           <path d="M122 36 C150 40, 170 64, 170 90 C170 116, 152 136, 122 138 C92 136, 74 116, 74 88 C74 62, 92 40, 122 36 Z"></path>
@@ -2392,7 +2487,7 @@ function renderLibraryLayer(kind, variantId, transform, interactive, selectedLay
       ${interactive ? `style="cursor:grab;"` : ""}
     >
       <g transform="translate(122 122) rotate(${rotation}) scale(${scale}) translate(-122 -122)">
-        ${contentMap[kind](variantId)}
+        ${contentMap[kind](variantId, sanitizeColor(transform?.color), kind)}
         ${interactive && selected ? renderSelectionHandles(box, layerId, editMode, false) : ""}
       </g>
     </g>
@@ -2466,7 +2561,36 @@ function renderSelectionHandles(bounds, layerId, editMode, isFragment) {
   `;
 }
 
-function renderBody(id) {
+function renderBasicShape(id, color = DEFAULT_SHAPE_COLOR, kind = "body") {
+  const layout = {
+    element: { cx: 122, cy: 134, w: 146, h: 118, opacity: 0.56 },
+    body: { cx: 122, cy: 156, w: 116, h: 116, opacity: 0.88 },
+    head: { cx: 126, cy: 88, w: 82, h: 82, opacity: 0.92 },
+    companion: { cx: 184, cy: 126, w: 70, h: 70, opacity: 0.86 }
+  }[kind] || { cx: 122, cy: 122, w: 96, h: 96, opacity: 0.86 };
+  const x = layout.cx - layout.w / 2;
+  const y = layout.cy - layout.h / 2;
+  const fill = sanitizeColor(color);
+  const stroke = "rgba(77,50,40,0.2)";
+  const highlight = "rgba(255,255,255,0.42)";
+  const shape = {
+    circle: `<ellipse cx="${layout.cx}" cy="${layout.cy}" rx="${layout.w / 2}" ry="${layout.h / 2}" fill="${fill}" stroke="${stroke}" stroke-width="3"></ellipse>`,
+    rectangle: `<rect x="${x}" y="${y}" width="${layout.w}" height="${layout.h * 0.72}" rx="10" fill="${fill}" stroke="${stroke}" stroke-width="3"></rect>`,
+    square: `<rect x="${layout.cx - Math.min(layout.w, layout.h) / 2}" y="${layout.cy - Math.min(layout.w, layout.h) / 2}" width="${Math.min(layout.w, layout.h)}" height="${Math.min(layout.w, layout.h)}" rx="8" fill="${fill}" stroke="${stroke}" stroke-width="3"></rect>`,
+    triangle: `<path d="M ${layout.cx} ${y} L ${x + layout.w} ${y + layout.h} L ${x} ${y + layout.h} Z" fill="${fill}" stroke="${stroke}" stroke-width="3"></path>`
+  }[id] || "";
+  return `
+    <g opacity="${layout.opacity}">
+      ${shape}
+      <path d="M ${x + layout.w * 0.22} ${y + layout.h * 0.28} C ${x + layout.w * 0.42} ${y + layout.h * 0.14}, ${x + layout.w * 0.66} ${y + layout.h * 0.16}, ${x + layout.w * 0.82} ${y + layout.h * 0.34}" stroke="${highlight}" stroke-width="4" fill="none" stroke-linecap="round"></path>
+    </g>
+  `;
+}
+
+function renderBody(id, color = DEFAULT_SHAPE_COLOR) {
+  if (BASIC_SHAPE_IDS.has(id)) {
+    return renderBasicShape(id, color, "body");
+  }
   switch (id) {
     case "sea":
       return `
@@ -2498,12 +2622,13 @@ function renderBody(id) {
           <path d="M78 106 L158 98 L176 118 L170 202 L82 206 L66 186 L68 124 Z" fill="url(#metalBody)"></path>
           <g clip-path="url(#bodyClipMetal)">
             <rect x="62" y="96" width="122" height="116" fill="url(#metalPattern)" opacity="0.88"></rect>
-            <path d="M72 134 L166 126" stroke="rgba(245,250,252,0.26)" stroke-width="3"></path>
-            <path d="M84 182 L162 174" stroke="rgba(38,57,67,0.22)" stroke-width="4"></path>
+            <path d="M72 128 L168 120" stroke="rgba(245,250,252,0.28)" stroke-width="3"></path>
+            <path d="M76 154 L164 146" stroke="rgba(245,250,252,0.18)" stroke-width="2"></path>
+            <path d="M84 188 L162 180" stroke="rgba(38,57,67,0.24)" stroke-width="4"></path>
           </g>
-          <circle cx="90" cy="126" r="7" fill="#dfe7eb"></circle>
-          <circle cx="152" cy="120" r="7" fill="#dfe7eb"></circle>
-          <path d="M86 164 L154 158" stroke="#d7e0e4" stroke-width="7" stroke-linecap="round"></path>
+          <circle cx="96" cy="140" r="4" fill="#dfe7eb" opacity="0.68"></circle>
+          <circle cx="150" cy="166" r="4" fill="#dfe7eb" opacity="0.54"></circle>
+          <path d="M112 104 L102 204" stroke="rgba(255,255,255,0.22)" stroke-width="3"></path>
         </g>
       `;
     case "root":
@@ -2548,7 +2673,10 @@ function renderBody(id) {
   }
 }
 
-function renderElement(id) {
+function renderElement(id, color = DEFAULT_SHAPE_COLOR) {
+  if (BASIC_SHAPE_IDS.has(id)) {
+    return renderBasicShape(id, color, "element");
+  }
   switch (id) {
     case "water":
       return `
@@ -2606,7 +2734,10 @@ function renderElement(id) {
   }
 }
 
-function renderHead(id) {
+function renderHead(id, color = DEFAULT_SHAPE_COLOR) {
+  if (BASIC_SHAPE_IDS.has(id)) {
+    return renderBasicShape(id, color, "head");
+  }
   switch (id) {
     case "shell":
       return `
@@ -2634,14 +2765,16 @@ function renderHead(id) {
     case "mask":
       return `
         <g transform="rotate(4 126 92)">
-          <path d="M86 84 C90 56, 158 48, 170 82 C178 106, 164 130, 126 136 C96 136, 82 110, 86 84 Z" fill="#f8f2e7"></path>
+          <path d="M82 86 C82 54, 102 42, 124 58 C148 38, 172 52, 176 84 C180 118, 158 142, 126 136 C96 144, 78 118, 82 86 Z" fill="#f8f2e7"></path>
           <g clip-path="url(#headClipMask)">
-            <ellipse cx="108" cy="88" rx="10" ry="7" fill="#4e4c56"></ellipse>
-            <ellipse cx="140" cy="88" rx="10" ry="7" fill="#4e4c56"></ellipse>
-            <path d="M108 112 C122 120, 136 120, 148 110" stroke="#b15e46" stroke-width="5" fill="none" stroke-linecap="round"></path>
-            <path d="M98 62 C114 54, 142 54, 156 62" stroke="rgba(121,84,67,0.34)" stroke-width="3" fill="none"></path>
-            <path d="M90 100 C100 108, 110 110, 118 112" stroke="rgba(130,95,80,0.18)" stroke-width="2" fill="none"></path>
+            <path d="M94 80 C104 66, 120 70, 122 88 C108 96, 98 92, 94 80 Z" fill="#4e4c56"></path>
+            <path d="M132 86 C134 68, 152 64, 162 78 C158 92, 146 98, 132 86 Z" fill="#4e4c56"></path>
+            <path d="M102 116 C116 108, 136 108, 152 116" stroke="#b15e46" stroke-width="5" fill="none" stroke-linecap="round"></path>
+            <path d="M96 58 C112 48, 142 48, 160 58" stroke="rgba(121,84,67,0.34)" stroke-width="4" fill="none"></path>
+            <path d="M88 104 C100 112, 112 116, 126 116 C140 116, 154 112, 168 102" stroke="rgba(130,95,80,0.18)" stroke-width="3" fill="none"></path>
+            <path d="M126 60 C120 82, 120 104, 126 132" stroke="rgba(207,113,80,0.34)" stroke-width="3" fill="none"></path>
           </g>
+          <path d="M82 86 C82 54, 102 42, 124 58 C148 38, 172 52, 176 84 C180 118, 158 142, 126 136 C96 144, 78 118, 82 86 Z" fill="none" stroke="rgba(77,50,40,0.2)" stroke-width="3"></path>
         </g>
       `;
     case "seed":
@@ -2673,7 +2806,6 @@ function renderHead(id) {
           <g clip-path="url(#headClipStar)">
             <path d="M96 78 C112 72, 136 72, 156 82" stroke="rgba(255,248,227,0.65)" stroke-width="4" fill="none"></path>
             <circle cx="126" cy="84" r="16" fill="rgba(255,242,204,0.24)"></circle>
-            <path d="M116 96 C124 100, 130 100, 138 96" stroke="rgba(160,95,40,0.34)" stroke-width="3" fill="none"></path>
           </g>
         </g>
       `;
@@ -2682,7 +2814,10 @@ function renderHead(id) {
   }
 }
 
-function renderCompanion(id) {
+function renderCompanion(id, color = DEFAULT_SHAPE_COLOR) {
+  if (BASIC_SHAPE_IDS.has(id)) {
+    return renderBasicShape(id, color, "companion");
+  }
   switch (id) {
     case "tube":
       return `
@@ -2857,6 +2992,11 @@ function sanitizeImageSrc(value) {
     return src;
   }
   return "";
+}
+
+function sanitizeColor(value) {
+  const text = String(value || "").trim();
+  return /^#[0-9a-f]{6}$/i.test(text) ? text : DEFAULT_SHAPE_COLOR;
 }
 
 function escapeHtml(value) {
