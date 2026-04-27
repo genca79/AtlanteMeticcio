@@ -21,7 +21,7 @@ const translations = {
     tagsPlaceholder: "Corpo, quartiere, ascolto, bambini", timeAvailability: "Disponibilita di tempo",
     closeness: "Distanza dal centro", closenessHint: "0 significa margine fertile, 100 significa grande prossimita al nucleo della compagnia. La posizione non e gerarchica: puo cambiare nel tempo.",
     puppet: "Pupazzo digitale", puppetHint: "Scegli una struttura di base e poi costruisci un collage personale piu libero.",
-    head: "Testa", body: "Corpo", element: "Elemento", object: "Oggetto", personalFragments: "Frammenti personali",
+    head: "Testa", body: "Corpo", element: "Elemento", object: "Oggetto", personalFragments: "Frammenti personali", uploadImages: "Carica immagini",
     placeFragment: "Colloca il frammento", onBody: "Sul corpo", onFace: "Sul volto", asObject: "Come oggetto",
     fragmentScale: "Scala frammento", fragmentRotation: "Rotazione frammento", removeFragment: "Rimuovi frammento",
     stageHint: "Seleziona un elemento e manipolalo direttamente sulla figura: trascina per spostare, usa le maniglie per ruotare e ridimensionare. In ritaglio sposti l'immagine dentro la sagoma.",
@@ -53,7 +53,7 @@ const translations = {
     tagsPlaceholder: "Body, neighborhood, listening, children", timeAvailability: "Time availability",
     closeness: "Distance from the center", closenessHint: "0 means fertile edge, 100 means strong closeness to the company core. The position is not hierarchical: it can change over time.",
     puppet: "Digital puppet", puppetHint: "Choose a base structure and then build a freer personal collage.",
-    head: "Head", body: "Body", element: "Element", object: "Object", personalFragments: "Personal fragments",
+    head: "Head", body: "Body", element: "Element", object: "Object", personalFragments: "Personal fragments", uploadImages: "Upload images",
     placeFragment: "Place the fragment", onBody: "On the body", onFace: "On the face", asObject: "As an object",
     fragmentScale: "Fragment scale", fragmentRotation: "Fragment rotation", removeFragment: "Remove fragment",
     stageHint: "Select an element and manipulate it directly on the figure: drag to move, use handles to rotate and resize. In crop mode, move the image inside the shape.",
@@ -85,7 +85,7 @@ const translations = {
     tagsPlaceholder: "Corps, quartier, ecoute, enfants", timeAvailability: "Disponibilite de temps",
     closeness: "Distance du centre", closenessHint: "0 signifie marge fertile, 100 signifie grande proximite avec le noyau de la compagnie. La position n'est pas hierarchique: elle peut changer dans le temps.",
     puppet: "Marionnette numerique", puppetHint: "Choisis une structure de base puis construis un collage personnel plus libre.",
-    head: "Tete", body: "Corps", element: "Element", object: "Objet", personalFragments: "Fragments personnels",
+    head: "Tete", body: "Corps", element: "Element", object: "Objet", personalFragments: "Fragments personnels", uploadImages: "Charger des images",
     placeFragment: "Placer le fragment", onBody: "Sur le corps", onFace: "Sur le visage", asObject: "Comme objet",
     fragmentScale: "Echelle du fragment", fragmentRotation: "Rotation du fragment", removeFragment: "Retirer le fragment",
     stageHint: "Selectionne un element et manipule-le directement sur la figure: fais glisser pour deplacer, utilise les poignees pour tourner et redimensionner. En recadrage, deplace l'image dans la forme.",
@@ -117,7 +117,7 @@ const translations = {
     tagsPlaceholder: "جسد، حي، إصغاء، أطفال", timeAvailability: "توفر الوقت",
     closeness: "المسافة من المركز", closenessHint: "0 يعني الهامش الخصب، و100 يعني قربا كبيرا من نواة المجموعة. الموقع ليس تراتبيا ويمكن أن يتغير مع الوقت.",
     puppet: "دمية رقمية", puppetHint: "اختر بنية أساسية ثم ابن كولاجا شخصيا أكثر حرية.",
-    head: "الرأس", body: "الجسد", element: "العنصر", object: "الغرض", personalFragments: "شظايا شخصية",
+    head: "الرأس", body: "الجسد", element: "العنصر", object: "الغرض", personalFragments: "شظايا شخصية", uploadImages: "تحميل الصور",
     placeFragment: "ضع الشظية", onBody: "على الجسد", onFace: "على الوجه", asObject: "كغرض",
     fragmentScale: "حجم الشظية", fragmentRotation: "دوران الشظية", removeFragment: "إزالة الشظية",
     stageHint: "اختر عنصرا وحرّكه مباشرة على الشكل: اسحب للتحريك، واستخدم المقابض للدوران وتغيير الحجم. في وضع القص حرّك الصورة داخل الشكل.",
@@ -297,10 +297,13 @@ const state = {
   editorCollage: null,
   activeFragmentId: null,
   pendingFragment: null,
+  pendingFragmentQueue: [],
   editingFragmentId: null,
   dragState: null,
   previewPointers: new Map(),
   cropDragState: null,
+  cropSelection: null,
+  cropCanvasRect: null,
   editMode: "move",
   filters: { search: "", availability: "all", zone: "all" },
   supabase: null,
@@ -365,12 +368,16 @@ const elements = {
   fragmentCropDialog: document.querySelector("#fragmentCropDialog"),
   fragmentCropForm: document.querySelector("#fragmentCropForm"),
   fragmentCropPreview: document.querySelector("#fragmentCropPreview"),
+  fragmentCropCanvas: document.querySelector("#fragmentCropCanvas"),
   closeFragmentCropButton: document.querySelector("#closeFragmentCropButton"),
   cancelFragmentCropButton: document.querySelector("#cancelFragmentCropButton"),
   fragmentMaskInput: document.querySelector("#fragmentMaskInput"),
-  fragmentCropXInput: document.querySelector("#fragmentCropXInput"),
-  fragmentCropYInput: document.querySelector("#fragmentCropYInput"),
-  fragmentCropZoomInput: document.querySelector("#fragmentCropZoomInput"),
+  removeBackgroundButton: document.querySelector("#removeBackgroundButton"),
+  resetFragmentImageButton: document.querySelector("#resetFragmentImageButton"),
+  resetCropSelectionButton: document.querySelector("#resetCropSelectionButton"),
+  backgroundThresholdInput: document.querySelector("#backgroundThresholdInput"),
+  backgroundFeatherInput: document.querySelector("#backgroundFeatherInput"),
+  removeBackgroundToggle: document.querySelector("#removeBackgroundToggle"),
   authDialog: document.querySelector("#authDialog"),
   authForm: document.querySelector("#authForm"),
   closeAuthDialogButton: document.querySelector("#closeAuthDialogButton"),
@@ -461,14 +468,17 @@ function bindEvents() {
   elements.removeCustomImageButton.addEventListener("click", removeCustomImage);
   elements.closeFragmentCropButton.addEventListener("click", closeFragmentCropDialog);
   elements.cancelFragmentCropButton.addEventListener("click", closeFragmentCropDialog);
+  elements.removeBackgroundButton.addEventListener("click", applyBackgroundRemovalToPendingFragment);
+  elements.resetFragmentImageButton.addEventListener("click", resetPendingFragmentImage);
+  elements.resetCropSelectionButton.addEventListener("click", resetCropSelection);
+  elements.backgroundThresholdInput.addEventListener("input", handleBackgroundThresholdInput);
+  elements.backgroundFeatherInput.addEventListener("input", handleBackgroundThresholdInput);
+  elements.removeBackgroundToggle.addEventListener("change", handleRemoveBackgroundToggleChange);
   elements.fragmentCropForm.addEventListener("submit", confirmFragmentCrop);
-  [
-    elements.fragmentMaskInput,
-    elements.fragmentCropXInput,
-    elements.fragmentCropYInput,
-    elements.fragmentCropZoomInput
-  ].forEach((input) => input.addEventListener("input", updateFragmentCropPreview));
+  [elements.fragmentMaskInput].forEach((input) => input.addEventListener("input", updateFragmentCropPreview));
   elements.fragmentCropPreview.addEventListener("pointerdown", handleFragmentCropPointerDown);
+  elements.fragmentCropPreview.addEventListener("pointermove", handleFragmentCropPointerHover);
+  elements.fragmentCropPreview.addEventListener("dblclick", resetCropSelection);
   elements.collagePreview.addEventListener("pointerdown", handlePreviewPointerDown);
   elements.collagePreview.addEventListener("dblclick", handlePreviewDoubleClick);
   elements.collagePreview.addEventListener("wheel", handlePreviewWheel, { passive: false });
@@ -573,7 +583,7 @@ function applyTranslations() {
   setLabelText("#bodyInput", "body");
   setLabelText("#elementInput", "element");
   setLabelText("#companionInput", "object");
-  setLabelText("#customImageInput", "personalFragments");
+  setLabelText("#customImageInput", "uploadImages");
   setLabelText("#customImagePlacementInput", "placeFragment");
   setLabelText("#customImageScaleInput", "fragmentScale");
   setLabelText("#customImageRotationInput", "fragmentRotation");
@@ -585,9 +595,6 @@ function applyTranslations() {
   setText("#cancelFragmentCropButton", "cancel");
   setText("#confirmFragmentCropButton", "cropImport");
   setLabelText("#fragmentMaskInput", "cropShape");
-  setLabelText("#fragmentCropXInput", "cropX");
-  setLabelText("#fragmentCropYInput", "cropY");
-  setLabelText("#fragmentCropZoomInput", "cropZoom");
 
   translateOption("#availabilityFilter option[value='all']", "allF");
   translateOption("#availabilityFilter option[value='Alta']", "availability.Alta");
@@ -1401,15 +1408,27 @@ async function handleCustomImageSelected(event) {
   if (!files.length) {
     return;
   }
-
-  const file = files[0];
-  const src = await readFileAsDataUrl(file);
-  state.pendingFragment = {
-    id: crypto.randomUUID(),
-    name: file.name || "Frammento",
-    src
-  };
+  state.pendingFragmentQueue = await Promise.all(files.map(async (file) => {
+    const src = await readFileAsDataUrl(file);
+    return {
+      id: crypto.randomUUID(),
+      name: file.name || "Frammento",
+      originalSrc: src,
+      src,
+      image: await loadImageFromSrc(src),
+      backgroundRemoved: false
+    };
+  }));
   elements.customImageInput.value = "";
+  openNextPendingFragment();
+}
+
+function openNextPendingFragment() {
+  const nextFragment = state.pendingFragmentQueue.shift() || null;
+  if (!nextFragment) {
+    return;
+  }
+  state.pendingFragment = nextFragment;
   openFragmentCropDialog();
 }
 
@@ -1417,10 +1436,11 @@ function openFragmentCropDialog() {
   if (!state.pendingFragment) {
     return;
   }
+  state.cropSelection = buildDefaultCropSelection(state.pendingFragment.image);
+  state.cropCanvasRect = null;
   elements.fragmentMaskInput.value = "rect";
-  elements.fragmentCropXInput.value = "0";
-  elements.fragmentCropYInput.value = "0";
-  elements.fragmentCropZoomInput.value = "100";
+  elements.backgroundThresholdInput.value = "36";
+  elements.removeBackgroundToggle.checked = Boolean(state.pendingFragment.backgroundRemoved);
   updateFragmentCropPreview();
   elements.fragmentCropDialog.showModal();
 }
@@ -1433,51 +1453,82 @@ function openFragmentCropDialogForExisting(fragment) {
   state.pendingFragment = {
     id: fragment.id,
     name: fragment.name || "Frammento",
-    src: fragment.src
+    originalSrc: fragment.src,
+    src: fragment.src,
+    image: null,
+    backgroundRemoved: false
   };
-  const isSquare = fragment.mask === "rect" && Math.abs(fragment.width - fragment.height) <= 2;
-  elements.fragmentMaskInput.value = isSquare ? "square" : fragment.mask || "rect";
-  elements.fragmentCropXInput.value = String(Math.round(fragment.cropX || 0));
-  elements.fragmentCropYInput.value = String(Math.round(fragment.cropY || 0));
-  elements.fragmentCropZoomInput.value = String(Math.round((fragment.cropScale || 1) * 100));
-  updateFragmentCropPreview();
-  elements.fragmentCropDialog.showModal();
+  loadImageFromSrc(fragment.src).then((image) => {
+    if (!state.pendingFragment || state.pendingFragment.id !== fragment.id) {
+      return;
+    }
+    state.pendingFragment.image = image;
+    state.cropSelection = {
+      x: 0,
+      y: 0,
+      width: image.naturalWidth,
+      height: image.naturalHeight
+    };
+    state.cropCanvasRect = null;
+    const isSquare = fragment.mask === "rect" && Math.abs(fragment.width - fragment.height) <= 2;
+    elements.fragmentMaskInput.value = isSquare ? "square" : fragment.mask || "rect";
+    elements.backgroundThresholdInput.value = "36";
+    elements.removeBackgroundToggle.checked = false;
+    updateFragmentCropPreview();
+    elements.fragmentCropDialog.showModal();
+  });
 }
 
 function closeFragmentCropDialog() {
   elements.fragmentCropDialog.close();
   state.pendingFragment = null;
+  state.pendingFragmentQueue = [];
   state.editingFragmentId = null;
+  state.cropSelection = null;
+  state.cropCanvasRect = null;
+  state.cropDragState = null;
 }
 
 function updateFragmentCropPreview() {
-  if (!state.pendingFragment) {
+  if (!state.pendingFragment?.image) {
     return;
   }
-  const cropX = Number(elements.fragmentCropXInput.value);
-  const cropY = Number(elements.fragmentCropYInput.value);
-  const zoom = Number(elements.fragmentCropZoomInput.value);
   const mask = elements.fragmentMaskInput.value;
   elements.fragmentCropPreview.className = `fragment-crop-preview crop-mask-${mask}`;
-  elements.fragmentCropPreview.style.backgroundImage = `url("${state.pendingFragment.src}")`;
-  elements.fragmentCropPreview.style.backgroundSize = `${zoom}% ${zoom}%`;
-  elements.fragmentCropPreview.style.backgroundPosition = `${50 + cropX}% ${50 + cropY}%`;
+  const canvas = elements.fragmentCropCanvas;
+  const ctx = canvas.getContext("2d");
+  const image = state.pendingFragment.image;
+  const width = canvas.width;
+  const height = canvas.height;
+  ctx.clearRect(0, 0, width, height);
+  const fit = fitRect(image.naturalWidth, image.naturalHeight, width, height, 28);
+  state.cropCanvasRect = fit;
+  ctx.drawImage(image, fit.x, fit.y, fit.width, fit.height);
+  drawCropSelection(ctx, width, height, fit, state.cropSelection);
 }
 
 function handleFragmentCropPointerDown(event) {
-  if (!state.pendingFragment) {
+  if (!state.pendingFragment?.image || !state.cropCanvasRect) {
     return;
   }
   event.preventDefault();
   elements.fragmentCropPreview.setPointerCapture?.(event.pointerId);
+  const point = cropPointerToImagePoint(event);
+  if (!point) {
+    return;
+  }
+  const activeHandle = getSelectionHandleAtPoint(point, state.cropSelection);
+  const insideSelection = isPointInsideSelection(point, state.cropSelection);
+  elements.fragmentCropPreview.classList.toggle("is-moving", insideSelection && !activeHandle);
   state.cropDragState = {
     pointerId: event.pointerId,
     startX: event.clientX,
     startY: event.clientY,
-    baseCropX: Number(elements.fragmentCropXInput.value),
-    baseCropY: Number(elements.fragmentCropYInput.value),
-    scaleX: 160 / Math.max(1, elements.fragmentCropPreview.clientWidth),
-    scaleY: 160 / Math.max(1, elements.fragmentCropPreview.clientHeight)
+    mode: activeHandle ? "resize" : insideSelection ? "move" : "draw",
+    handle: activeHandle,
+    startImageX: point.x,
+    startImageY: point.y,
+    baseSelection: state.cropSelection ? { ...state.cropSelection } : null
   };
   window.addEventListener("pointermove", handleFragmentCropPointerMove);
   window.addEventListener("pointerup", handleFragmentCropPointerUp);
@@ -1487,18 +1538,35 @@ function handleFragmentCropPointerMove(event) {
   if (!state.cropDragState) {
     return;
   }
-  const nextX = clamp(
-    state.cropDragState.baseCropX - (event.clientX - state.cropDragState.startX) * state.cropDragState.scaleX,
-    -80,
-    80
-  );
-  const nextY = clamp(
-    state.cropDragState.baseCropY - (event.clientY - state.cropDragState.startY) * state.cropDragState.scaleY,
-    -80,
-    80
-  );
-  elements.fragmentCropXInput.value = String(Math.round(nextX));
-  elements.fragmentCropYInput.value = String(Math.round(nextY));
+  const point = cropPointerToImagePoint(event);
+  if (!point) {
+    return;
+  }
+  const image = state.pendingFragment.image;
+  if (state.cropDragState.mode === "resize" && state.cropDragState.baseSelection) {
+    state.cropSelection = resizeSelectionFromHandle(
+      state.cropDragState.baseSelection,
+      state.cropDragState.handle,
+      point,
+      image.naturalWidth,
+      image.naturalHeight
+    );
+  } else if (state.cropDragState.mode === "move" && state.cropDragState.baseSelection) {
+    const dx = point.x - state.cropDragState.startImageX;
+    const dy = point.y - state.cropDragState.startImageY;
+    state.cropSelection = clampSelectionToImage({
+      ...state.cropDragState.baseSelection,
+      x: state.cropDragState.baseSelection.x + dx,
+      y: state.cropDragState.baseSelection.y + dy
+    }, image.naturalWidth, image.naturalHeight);
+  } else {
+    state.cropSelection = normalizeCropRect({
+      x: state.cropDragState.startImageX,
+      y: state.cropDragState.startImageY,
+      width: point.x - state.cropDragState.startImageX,
+      height: point.y - state.cropDragState.startImageY
+    }, image.naturalWidth, image.naturalHeight);
+  }
   updateFragmentCropPreview();
 }
 
@@ -1506,32 +1574,55 @@ function handleFragmentCropPointerUp(event) {
   if (state.cropDragState?.pointerId !== undefined) {
     elements.fragmentCropPreview.releasePointerCapture?.(state.cropDragState.pointerId);
   }
+  elements.fragmentCropPreview.classList.remove("is-moving");
   state.cropDragState = null;
   window.removeEventListener("pointermove", handleFragmentCropPointerMove);
   window.removeEventListener("pointerup", handleFragmentCropPointerUp);
 }
 
-function confirmFragmentCrop(event) {
+function handleFragmentCropPointerHover(event) {
+  if (state.cropDragState || !state.pendingFragment?.image || !state.cropSelection) {
+    return;
+  }
+  const point = cropPointerToImagePoint(event);
+  if (!point) {
+    return;
+  }
+  const handle = getSelectionHandleAtPoint(point, state.cropSelection);
+  if (handle === "nw" || handle === "se") {
+    elements.fragmentCropPreview.style.cursor = "nwse-resize";
+  } else if (handle === "ne" || handle === "sw") {
+    elements.fragmentCropPreview.style.cursor = "nesw-resize";
+  } else if (isPointInsideSelection(point, state.cropSelection)) {
+    elements.fragmentCropPreview.style.cursor = "grab";
+  } else {
+    elements.fragmentCropPreview.style.cursor = "crosshair";
+  }
+}
+
+async function confirmFragmentCrop(event) {
   event.preventDefault();
-  if (!state.pendingFragment || !state.editorCollage) {
+  if (!state.pendingFragment?.image || !state.editorCollage || !state.cropSelection) {
     return;
   }
 
   const maskValue = elements.fragmentMaskInput.value;
   const isSquare = maskValue === "square";
+  const { src: croppedSrc, width: croppedWidth, height: croppedHeight } = await exportCroppedPendingFragment();
+  const dimensions = getFragmentDimensionsFromCrop(croppedWidth, croppedHeight, isSquare ? "square" : maskValue);
   const fragment = {
     id: state.pendingFragment.id,
     name: state.pendingFragment.name,
-    src: state.pendingFragment.src,
+    src: croppedSrc,
     x: 122,
     y: 150,
-    width: isSquare ? 92 : 108,
-    height: isSquare ? 92 : maskValue === "rect" ? 78 : 108,
+    width: dimensions.width,
+    height: dimensions.height,
     rotation: 0,
     opacity: 0.92,
-    cropX: Number(elements.fragmentCropXInput.value),
-    cropY: Number(elements.fragmentCropYInput.value),
-    cropScale: Number(elements.fragmentCropZoomInput.value) / 100,
+    cropX: 0,
+    cropY: 0,
+    cropScale: 1,
     mask: isSquare ? "rect" : maskValue,
     zIndex: Math.max(50, getMaxFragmentZIndex() + 10)
   };
@@ -1541,6 +1632,7 @@ function confirmFragmentCrop(event) {
       entry.id === state.editingFragmentId
         ? {
             ...entry,
+            src: fragment.src,
             width: fragment.width,
             height: fragment.height,
             cropX: fragment.cropX,
@@ -1555,10 +1647,326 @@ function confirmFragmentCrop(event) {
     state.editorCollage.fragments.push(fragment);
     state.activeFragmentId = `fragment:${fragment.id}`;
   }
+  const hasNextPending = state.pendingFragmentQueue.length > 0;
   elements.fragmentCropDialog.close();
   state.pendingFragment = null;
   state.editingFragmentId = null;
+  state.cropSelection = null;
+  state.cropCanvasRect = null;
   renderCollagePreviewFromForm();
+  if (hasNextPending) {
+    openNextPendingFragment();
+  }
+}
+
+function buildDefaultCropSelection(image) {
+  const size = Math.min(image.naturalWidth, image.naturalHeight) * 0.72;
+  return {
+    x: Math.round((image.naturalWidth - size) / 2),
+    y: Math.round((image.naturalHeight - size) / 2),
+    width: Math.round(size),
+    height: Math.round(size)
+  };
+}
+
+function fitRect(sourceWidth, sourceHeight, targetWidth, targetHeight, padding = 0) {
+  const innerWidth = Math.max(1, targetWidth - padding * 2);
+  const innerHeight = Math.max(1, targetHeight - padding * 2);
+  const scale = Math.min(innerWidth / sourceWidth, innerHeight / sourceHeight);
+  const width = sourceWidth * scale;
+  const height = sourceHeight * scale;
+  return {
+    x: (targetWidth - width) / 2,
+    y: (targetHeight - height) / 2,
+    width,
+    height,
+    scale
+  };
+}
+
+function drawCropSelection(ctx, canvasWidth, canvasHeight, fit, selection) {
+  if (!selection) {
+    return;
+  }
+  const x = fit.x + selection.x * fit.scale;
+  const y = fit.y + selection.y * fit.scale;
+  const width = selection.width * fit.scale;
+  const height = selection.height * fit.scale;
+  ctx.save();
+  ctx.fillStyle = "rgba(32, 24, 20, 0.42)";
+  ctx.fillRect(0, 0, canvasWidth, Math.max(0, y));
+  ctx.fillRect(0, y, Math.max(0, x), height);
+  ctx.fillRect(x + width, y, Math.max(0, canvasWidth - (x + width)), height);
+  ctx.fillRect(0, y + height, canvasWidth, Math.max(0, canvasHeight - (y + height)));
+  ctx.strokeStyle = "rgba(187, 88, 53, 0.96)";
+  ctx.lineWidth = 3;
+  ctx.setLineDash([10, 7]);
+  ctx.strokeRect(x, y, width, height);
+  ctx.setLineDash([]);
+  ctx.fillStyle = "#fff7ef";
+  [
+    [x, y],
+    [x + width, y],
+    [x + width, y + height],
+    [x, y + height]
+  ].forEach(([px, py]) => {
+    ctx.beginPath();
+    ctx.arc(px, py, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#bb5835";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  });
+  ctx.restore();
+}
+
+function cropPointerToImagePoint(event) {
+  if (!state.cropCanvasRect || !state.pendingFragment?.image) {
+    return null;
+  }
+  const rect = elements.fragmentCropCanvas.getBoundingClientRect();
+  const canvasX = (event.clientX - rect.left) * (elements.fragmentCropCanvas.width / Math.max(1, rect.width));
+  const canvasY = (event.clientY - rect.top) * (elements.fragmentCropCanvas.height / Math.max(1, rect.height));
+  const x = clamp((canvasX - state.cropCanvasRect.x) / state.cropCanvasRect.scale, 0, state.pendingFragment.image.naturalWidth);
+  const y = clamp((canvasY - state.cropCanvasRect.y) / state.cropCanvasRect.scale, 0, state.pendingFragment.image.naturalHeight);
+  return { x, y };
+}
+
+function isPointInsideSelection(point, selection) {
+  if (!selection) {
+    return false;
+  }
+  return (
+    point.x >= selection.x &&
+    point.x <= selection.x + selection.width &&
+    point.y >= selection.y &&
+    point.y <= selection.y + selection.height
+  );
+}
+
+function getSelectionHandleAtPoint(point, selection) {
+  if (!selection) {
+    return "";
+  }
+  const handles = {
+    nw: { x: selection.x, y: selection.y },
+    ne: { x: selection.x + selection.width, y: selection.y },
+    se: { x: selection.x + selection.width, y: selection.y + selection.height },
+    sw: { x: selection.x, y: selection.y + selection.height }
+  };
+  const tolerance = Math.max(18, Math.min(selection.width, selection.height) * 0.08);
+  return Object.entries(handles).find(([, handle]) => (
+    Math.hypot(point.x - handle.x, point.y - handle.y) <= tolerance
+  ))?.[0] || "";
+}
+
+function resizeSelectionFromHandle(baseSelection, handle, point, maxWidth, maxHeight) {
+  const minSize = 24;
+  let left = baseSelection.x;
+  let top = baseSelection.y;
+  let right = baseSelection.x + baseSelection.width;
+  let bottom = baseSelection.y + baseSelection.height;
+  if (handle.includes("n")) top = point.y;
+  if (handle.includes("s")) bottom = point.y;
+  if (handle.includes("w")) left = point.x;
+  if (handle.includes("e")) right = point.x;
+  if (right - left < minSize) {
+    if (handle.includes("w")) left = right - minSize;
+    else right = left + minSize;
+  }
+  if (bottom - top < minSize) {
+    if (handle.includes("n")) top = bottom - minSize;
+    else bottom = top + minSize;
+  }
+  return clampSelectionToImage({
+    x: left,
+    y: top,
+    width: right - left,
+    height: bottom - top
+  }, maxWidth, maxHeight);
+}
+
+function normalizeCropRect(rect, maxWidth, maxHeight) {
+  const normalized = {
+    x: rect.width >= 0 ? rect.x : rect.x + rect.width,
+    y: rect.height >= 0 ? rect.y : rect.y + rect.height,
+    width: Math.abs(rect.width),
+    height: Math.abs(rect.height)
+  };
+  return clampSelectionToImage({
+    x: normalized.x,
+    y: normalized.y,
+    width: Math.max(24, normalized.width),
+    height: Math.max(24, normalized.height)
+  }, maxWidth, maxHeight);
+}
+
+function clampSelectionToImage(selection, maxWidth, maxHeight) {
+  const width = clamp(selection.width, 24, maxWidth);
+  const height = clamp(selection.height, 24, maxHeight);
+  return {
+    x: clamp(selection.x, 0, Math.max(0, maxWidth - width)),
+    y: clamp(selection.y, 0, Math.max(0, maxHeight - height)),
+    width,
+    height
+  };
+}
+
+function handleRemoveBackgroundToggleChange() {
+  if (elements.removeBackgroundToggle.checked) {
+    applyBackgroundRemovalToPendingFragment();
+  } else {
+    resetPendingFragmentImage();
+  }
+}
+
+function handleBackgroundThresholdInput() {
+  if (elements.removeBackgroundToggle.checked) {
+    applyBackgroundRemovalToPendingFragment();
+  }
+}
+
+function resetCropSelection() {
+  if (!state.pendingFragment?.image) {
+    return;
+  }
+  state.cropSelection = buildDefaultCropSelection(state.pendingFragment.image);
+  updateFragmentCropPreview();
+}
+
+async function applyBackgroundRemovalToPendingFragment() {
+  if (!state.pendingFragment?.originalSrc) {
+    return;
+  }
+  const image = await loadImageFromSrc(state.pendingFragment.originalSrc);
+  const threshold = Number(elements.backgroundThresholdInput.value);
+  const feather = Number(elements.backgroundFeatherInput.value);
+  const canvas = document.createElement("canvas");
+  canvas.width = image.naturalWidth;
+  canvas.height = image.naturalHeight;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(image, 0, 0);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const target = sampleBackgroundColor(imageData, canvas.width, canvas.height);
+  const data = imageData.data;
+  for (let index = 0; index < data.length; index += 4) {
+    const distance = colorDistance(
+      data[index],
+      data[index + 1],
+      data[index + 2],
+      target.r,
+      target.g,
+      target.b
+    );
+    if (distance <= threshold) {
+      data[index + 3] = 0;
+    } else if (feather > 0 && distance <= threshold + feather) {
+      const alphaRatio = (distance - threshold) / feather;
+      data[index + 3] = Math.round(data[index + 3] * alphaRatio);
+    }
+  }
+  ctx.putImageData(imageData, 0, 0);
+  const src = canvas.toDataURL("image/png");
+  state.pendingFragment.src = src;
+  state.pendingFragment.image = await loadImageFromSrc(src);
+  state.pendingFragment.backgroundRemoved = true;
+  elements.removeBackgroundToggle.checked = true;
+  updateFragmentCropPreview();
+}
+
+async function resetPendingFragmentImage() {
+  if (!state.pendingFragment?.originalSrc) {
+    return;
+  }
+  state.pendingFragment.src = state.pendingFragment.originalSrc;
+  state.pendingFragment.image = await loadImageFromSrc(state.pendingFragment.originalSrc);
+  state.pendingFragment.backgroundRemoved = false;
+  elements.removeBackgroundToggle.checked = false;
+  updateFragmentCropPreview();
+}
+
+function sampleBackgroundColor(imageData, width, height) {
+  const samplePoints = [
+    [6, 6],
+    [width - 7, 6],
+    [6, height - 7],
+    [width - 7, height - 7]
+  ];
+  const total = { r: 0, g: 0, b: 0, count: 0 };
+  samplePoints.forEach(([startX, startY]) => {
+    for (let y = startY - 3; y <= startY + 3; y += 1) {
+      for (let x = startX - 3; x <= startX + 3; x += 1) {
+        const safeX = clamp(x, 0, width - 1);
+        const safeY = clamp(y, 0, height - 1);
+        const index = (safeY * width + safeX) * 4;
+        total.r += imageData.data[index];
+        total.g += imageData.data[index + 1];
+        total.b += imageData.data[index + 2];
+        total.count += 1;
+      }
+    }
+  });
+  return {
+    r: total.r / total.count,
+    g: total.g / total.count,
+    b: total.b / total.count
+  };
+}
+
+function colorDistance(r1, g1, b1, r2, g2, b2) {
+  return Math.hypot(r1 - r2, g1 - g2, b1 - b2) / Math.sqrt(3);
+}
+
+async function exportCroppedPendingFragment() {
+  const image = state.pendingFragment.image;
+  const selection = state.cropSelection;
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(selection.width));
+  canvas.height = Math.max(1, Math.round(selection.height));
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(
+    image,
+    selection.x,
+    selection.y,
+    selection.width,
+    selection.height,
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+  return {
+    src: canvas.toDataURL("image/png"),
+    width: canvas.width,
+    height: canvas.height
+  };
+}
+
+function getFragmentDimensionsFromCrop(sourceWidth, sourceHeight, mask) {
+  if (mask === "square") {
+    return { width: 96, height: 96 };
+  }
+  const maxSide = 116;
+  const ratio = sourceWidth / Math.max(1, sourceHeight);
+  if (ratio >= 1) {
+    return {
+      width: maxSide,
+      height: clamp(Math.round(maxSide / ratio), 48, 140)
+    };
+  }
+  return {
+    width: clamp(Math.round(maxSide * ratio), 48, 140),
+    height: maxSide
+  };
+}
+
+function loadImageFromSrc(src) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = src;
+  });
 }
 
 function removeCustomImage() {

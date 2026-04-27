@@ -745,9 +745,30 @@ textarea:focus {
   background-size: cover;
 }
 
+.upload-field {
+  cursor: pointer;
+}
+
+.upload-field span {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 0;
+  padding: 11px 14px;
+  border-radius: 999px;
+  color: #fff8f1;
+  background: linear-gradient(135deg, var(--terracotta), #8f2d25);
+  box-shadow: 0 10px 22px rgba(157, 55, 47, 0.18);
+}
+
 .upload-field input[type="file"] {
-  padding: 10px;
-  background: rgba(255, 252, 248, 0.85);
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .collage-controls small {
@@ -867,21 +888,48 @@ textarea:focus {
   align-items: start;
 }
 
+.fragment-crop-workbench {
+  display: grid;
+  gap: 12px;
+}
+
+.fragment-crop-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .fragment-crop-preview {
+  position: relative;
   min-height: 420px;
   border-radius: 18px;
   border: 1px dashed rgba(90, 57, 41, 0.24);
-  background-color: rgba(255, 250, 244, 0.9);
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 100% 100%;
+  background:
+    linear-gradient(45deg, rgba(122, 95, 74, 0.06) 25%, transparent 25%, transparent 75%, rgba(122, 95, 74, 0.06) 75%),
+    linear-gradient(45deg, rgba(122, 95, 74, 0.06) 25%, transparent 25%, transparent 75%, rgba(122, 95, 74, 0.06) 75%),
+    rgba(255, 250, 244, 0.92);
+  background-size: 18px 18px, 18px 18px, auto;
+  background-position: 0 0, 9px 9px, 0 0;
   box-shadow: inset 0 0 0 999px rgba(255, 248, 238, 0.12);
-  cursor: grab;
+  cursor: crosshair;
   touch-action: none;
   user-select: none;
+  overflow: hidden;
 }
 
-.fragment-crop-preview:active {
+.fragment-crop-canvas {
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  display: block;
+  touch-action: none;
+}
+
+.fragment-crop-preview.is-moving {
+  cursor: grab;
+}
+
+.fragment-crop-preview.is-moving:active {
   cursor: grabbing;
 }
 
@@ -900,6 +948,13 @@ textarea:focus {
 
 .fragment-crop-preview.crop-mask-torn {
   clip-path: polygon(7% 3%, 34% 8%, 61% 3%, 95% 10%, 91% 33%, 97% 56%, 92% 91%, 63% 96%, 39% 92%, 8% 96%, 4% 67%, 9% 38%);
+}
+
+.fragment-crop-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
 }
 
 .mini-title {

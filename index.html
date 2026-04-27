@@ -211,7 +211,7 @@
               <select id="companionInput" name="companion"></select>
             </label>
             <label class="upload-field">
-              <span>Frammenti personali</span>
+              <span>Carica immagini</span>
               <input id="customImageInput" name="customImage" type="file" accept="image/*" multiple>
             </label>
             <label>
@@ -263,7 +263,17 @@
         <button id="closeFragmentCropButton" class="ghost-button small" type="button">Chiudi</button>
       </div>
       <div class="fragment-crop-grid">
-        <div id="fragmentCropPreview" class="fragment-crop-preview"></div>
+        <div class="fragment-crop-workbench">
+          <div class="fragment-crop-toolbar">
+            <button id="removeBackgroundButton" class="ghost-button small" type="button">Togli sfondo</button>
+            <button id="resetFragmentImageButton" class="ghost-button small" type="button">Ripristina immagine</button>
+            <button id="resetCropSelectionButton" class="ghost-button small" type="button">Ripristina area</button>
+          </div>
+          <div id="fragmentCropPreview" class="fragment-crop-preview">
+            <canvas id="fragmentCropCanvas" class="fragment-crop-canvas" width="900" height="640"></canvas>
+          </div>
+          <p class="fragment-crop-hint">Disegna un'area sull'immagine. Se clicchi dentro la selezione puoi spostarla.</p>
+        </div>
         <section class="form-section">
           <label>
             <span>Forma ritaglio</span>
@@ -276,17 +286,20 @@
             </select>
           </label>
           <label>
-            <span>Sposta orizzontale</span>
-            <input id="fragmentCropXInput" type="range" min="-80" max="80" step="1" value="0">
+            <span>Sensibilita sfondo</span>
+            <input id="backgroundThresholdInput" type="range" min="12" max="90" step="1" value="36">
           </label>
           <label>
-            <span>Sposta verticale</span>
-            <input id="fragmentCropYInput" type="range" min="-80" max="80" step="1" value="0">
+            <span>Morbidezza bordo</span>
+            <input id="backgroundFeatherInput" type="range" min="0" max="60" step="1" value="18">
           </label>
           <label>
-            <span>Zoom immagine</span>
-            <input id="fragmentCropZoomInput" type="range" min="100" max="260" step="1" value="100">
+            <span>Sfondo trasparente</span>
+            <input id="removeBackgroundToggle" type="checkbox">
           </label>
+          <div class="hint-box">
+            <p>L'area selezionata verra importata come frammento. Il tasto per lo sfondo rende trasparenti i colori vicini ai bordi.</p>
+          </div>
           <div class="editor-footer-actions">
             <button id="cancelFragmentCropButton" class="ghost-button" type="button">Annulla</button>
             <button id="confirmFragmentCropButton" class="primary-button" type="submit">Importa ritaglio</button>
