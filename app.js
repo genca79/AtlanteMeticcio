@@ -118,6 +118,7 @@ const state = {
   supabase: null,
   user: null,
   isAdmin: false,
+  accessGranted: false,
   useCloud: false,
   loading: false
 };
@@ -216,8 +217,8 @@ function hideLegacySingleFragmentControls() {
 }
 
 function bindEvents() {
-  elements.addPersonButton.addEventListener("click", () => openEditor());
-  elements.editPersonButton.addEventListener("click", () => state.selectedId && openEditor(state.selectedId));
+  elements.addPersonButton.addEventListener("click", () => openEditorWithAccess());
+  elements.editPersonButton.addEventListener("click", () => state.selectedId && openEditorWithAccess(state.selectedId));
   elements.exportButton.addEventListener("click", exportPeople);
   elements.resetButton.addEventListener("click", resetToDemo);
   elements.connectButton.addEventListener("click", showSupabaseHelp);
@@ -381,7 +382,7 @@ async function savePersonToSupabase(person, isExisting) {
   }
 
   const payload = toSupabaseRecord(person, state.user);
-  const query = isExisting && state.isAdmin
+  const query = isExisting
     ? state.supabase.from(PEOPLE_TABLE).update(payload).eq("id", person.id)
     : state.supabase.from(PEOPLE_TABLE).insert(payload);
   const { error } = await query;
@@ -392,8 +393,8 @@ async function savePersonToSupabase(person, isExisting) {
 }
 
 async function deletePersonFromSupabase(personId) {
-  if (!state.supabase || !state.isAdmin) {
-    return { ok: false, message: "Serve un accesso ADMIN." };
+  if (!state.supabase) {
+    return { ok: false, message: "Supabase non configurato." };
   }
 
   const { error } = await state.supabase.from(PEOPLE_TABLE).delete().eq("id", personId);
@@ -404,8 +405,8 @@ async function deletePersonFromSupabase(personId) {
 }
 
 async function hidePersonInSupabase(personId) {
-  if (!state.supabase || !state.isAdmin) {
-    return { ok: false, message: "Serve un accesso ADMIN." };
+  if (!state.supabase) {
+    return { ok: false, message: "Supabase non configurato." };
   }
 
   const { error } = await state.supabase
@@ -461,6 +462,9 @@ function render() {
 
 function getVisiblePeople() {
   return state.people.filter((person) => {
+    if (person.is_visible === false) {
+      return false;
+    }
     const zone = getZone(person.closeness);
     const text = [
       person.name,
@@ -666,11 +670,19 @@ function buildDetailSection(title, value) {
   `;
 }
 
+function openEditorWithAccess(personId = null) {
+  const action = personId ? "modificare questo pupazzo" : "creare un nuovo pupazzo";
+  if (!requestAccessCode(action)) {
+    return;
+  }
+  openEditor(personId);
+}
+
 function openEditor(personId = null) {
   state.editorId = personId;
   const person = state.people.find((entry) => entry.id === personId) || createEmptyPerson();
   if (personId && !canEditPerson(person)) {
-    updateStatus(currentModeLabel(), currentUserLabel(), "Solo ADMIN puo modificare le schede pubblicate.");
+    updateStatus(currentModeLabel(), currentUserLabel(), "Inserisci il codice laboratorio per modificare le schede pubblicate.");
     return;
   }
   state.editorCollage = normalizeEditorCollage(person.collage);
@@ -694,8 +706,8 @@ function openEditor(personId = null) {
   elements.companionInput.value = person.collage.companion;
   elements.customImageInput.value = "";
   elements.customImageInput.dataset.imageData = "";
-  elements.hidePersonButton.hidden = !personId || !state.isAdmin || person.is_visible === false;
-  elements.deletePersonButton.hidden = !personId || !state.isAdmin;
+  elements.hidePersonButton.hidden = !personId || person.is_visible === false;
+  elements.deletePersonButton.hidden = !personId;
   updateClosenessLabel();
   renderCollagePreviewFromForm();
   elements.editorDialog.showModal();
@@ -780,6 +792,9 @@ async function handleDeletePerson() {
   if (!state.editorId) {
     return;
   }
+  if (!requestAccessCode("cancellare questo pupazzo")) {
+    return;
+  }
 
   const person = state.people.find((entry) => entry.id === state.editorId);
   const confirmed = window.confirm(`Eliminare ${person?.name || "questa persona"}?`);
@@ -808,6 +823,9 @@ async function handleDeletePerson() {
 
 async function handleHidePerson() {
   if (!state.editorId) {
+    return;
+  }
+  if (!requestAccessCode("nascondere questo pupazzo")) {
     return;
   }
 
@@ -2018,9 +2036,10 @@ function renderCompanion(id) {
 }
 
 function updateAuthUI() {
+  elements.authButton.hidden = hasAccessCode();
   elements.authButton.textContent = state.isAdmin ? "Admin attivo" : "Admin";
   elements.signOutButton.hidden = !state.user;
-  elements.exportButton.hidden = state.useCloud && !state.isAdmin;
+  elements.exportButton.hidden = false;
   elements.resetButton.hidden = state.useCloud;
 }
 
@@ -2055,7 +2074,30 @@ function canEditPerson(person) {
   if (!state.useCloud) {
     return true;
   }
-  return state.isAdmin && Boolean(person);
+  return Boolean(person);
+}
+
+function hasAccessCode() {
+  return Boolean(String(CONFIG.ACCESS_CODE || "").trim());
+}
+
+function requestAccessCode(action) {
+  const expectedCode = String(CONFIG.ACCESS_CODE || "").trim();
+  if (!expectedCode || state.accessGranted) {
+    return true;
+  }
+
+  const enteredCode = window.prompt(`Inserisci il codice laboratorio per ${action}.`);
+  if (enteredCode === null) {
+    return false;
+  }
+  if (enteredCode.trim() === expectedCode) {
+    state.accessGranted = true;
+    return true;
+  }
+
+  updateStatus(currentModeLabel(), currentUserLabel(), "Codice laboratorio non corretto.");
+  return false;
 }
 
 function splitKeywords(value) {
@@ -2071,9 +2113,8 @@ function showSupabaseHelp() {
     "Per attivare la mappa condivisa:",
     "1. Apri config.js e inserisci SUPABASE_URL e SUPABASE_ANON_KEY.",
     "2. Esegui lo script SQL in supabase/schema.sql.",
-    "3. Inserisci le email admin nella tabella admin_users.",
-    "4. In Supabase Auth aggiungi l'URL della GitHub Page come redirect.",
-    "5. Pubblica su GitHub Pages."
+    "3. Imposta ACCESS_CODE con il codice laboratorio.",
+    "4. Pubblica su GitHub Pages."
   ].join("\n");
   window.alert(message);
 }

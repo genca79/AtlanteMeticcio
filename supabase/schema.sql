@@ -60,6 +60,8 @@ drop policy if exists "community_profiles_admin_read_all" on public.community_pr
 drop policy if exists "community_profiles_public_insert" on public.community_profiles;
 drop policy if exists "community_profiles_admin_update" on public.community_profiles;
 drop policy if exists "community_profiles_admin_delete" on public.community_profiles;
+drop policy if exists "community_profiles_public_update" on public.community_profiles;
+drop policy if exists "community_profiles_public_delete" on public.community_profiles;
 
 create policy "community_profiles_public_read_visible"
 on public.community_profiles
@@ -67,54 +69,24 @@ for select
 to anon, authenticated
 using (is_visible = true);
 
-create policy "community_profiles_admin_read_all"
-on public.community_profiles
-for select
-to authenticated
-using (
-  exists (
-    select 1
-    from public.admin_users
-    where admin_users.email = (auth.jwt() ->> 'email')
-  )
-);
-
 create policy "community_profiles_public_insert"
 on public.community_profiles
 for insert
 to anon, authenticated
 with check (is_visible = true);
 
-create policy "community_profiles_admin_update"
+create policy "community_profiles_public_update"
 on public.community_profiles
 for update
-to authenticated
-using (
-  exists (
-    select 1
-    from public.admin_users
-    where admin_users.email = (auth.jwt() ->> 'email')
-  )
-)
-with check (
-  exists (
-    select 1
-    from public.admin_users
-    where admin_users.email = (auth.jwt() ->> 'email')
-  )
-);
+to anon, authenticated
+using (true)
+with check (true);
 
-create policy "community_profiles_admin_delete"
+create policy "community_profiles_public_delete"
 on public.community_profiles
 for delete
-to authenticated
-using (
-  exists (
-    select 1
-    from public.admin_users
-    where admin_users.email = (auth.jwt() ->> 'email')
-  )
-);
+to anon, authenticated
+using (true);
 
--- Dopo avere creato il primo admin in Supabase Auth, abilitalo così:
--- insert into public.admin_users (email) values ('nome@cantierimeticci.org');
+-- Versione sperimentale con codice laboratorio in config.js.
+-- Chi conosce il codice puo creare, modificare, nascondere e cancellare profili dall'interfaccia.
