@@ -127,8 +127,9 @@ const elements = {
   addPersonButton: document.querySelector("#addPersonButton"),
   editPersonButton: document.querySelector("#editPersonButton"),
   exportButton: document.querySelector("#exportButton"),
+  importButton: document.querySelector("#importButton"),
+  importFileInput: document.querySelector("#importFileInput"),
   resetButton: document.querySelector("#resetButton"),
-  connectButton: document.querySelector("#connectButton"),
   authButton: document.querySelector("#authButton"),
   storageModeLabel: document.querySelector("#storageModeLabel"),
   authStatusLabel: document.querySelector("#authStatusLabel"),
@@ -220,8 +221,9 @@ function bindEvents() {
   elements.addPersonButton.addEventListener("click", () => openEditorWithAccess());
   elements.editPersonButton.addEventListener("click", () => state.selectedId && openEditorWithAccess(state.selectedId));
   elements.exportButton.addEventListener("click", exportPeople);
+  elements.importButton.addEventListener("click", handleImportButtonClick);
+  elements.importFileInput.addEventListener("change", handleImportFileSelected);
   elements.resetButton.addEventListener("click", resetToDemo);
-  elements.connectButton.addEventListener("click", showSupabaseHelp);
   elements.authButton.addEventListener("click", () => elements.authDialog.showModal());
   elements.closeAuthDialogButton.addEventListener("click", () => elements.authDialog.close());
   elements.authForm.addEventListener("submit", sendMagicLink);
@@ -869,6 +871,107 @@ function exportPeople() {
   URL.revokeObjectURL(url);
 }
 
+function handleImportButtonClick() {
+  if (!requestAccessCode("caricare un backup JSON")) {
+    return;
+  }
+  elements.importFileInput.value = "";
+  elements.importFileInput.click();
+}
+
+async function handleImportFileSelected(event) {
+  const file = event.target.files?.[0];
+  if (!file) {
+    return;
+  }
+
+  try {
+    const importedPeople = parseImportedPeople(await file.text());
+    if (!importedPeople.length) {
+      updateStatus(currentModeLabel(), currentUserLabel(), "Il file JSON non contiene profili validi.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Caricare ${importedPeople.length} profili dal JSON? La mappa corrente verra sostituita.`
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    if (state.useCloud) {
+      updateStatus("Cloud pubblico", currentUserLabel(), "Sto ripristinando la mappa dal JSON...");
+      const result = await replaceSupabasePeople(importedPeople);
+      if (!result.ok) {
+        updateStatus(currentModeLabel(), currentUserLabel(), `Import JSON fallito: ${result.message}`);
+        return;
+      }
+    }
+
+    state.people = importedPeople;
+    state.selectedId = state.people[0]?.id ?? null;
+    updateStatus(currentModeLabel(), currentUserLabel(), "Backup JSON caricato nella mappa.");
+    render();
+  } catch (error) {
+    updateStatus(currentModeLabel(), currentUserLabel(), `JSON non valido: ${error.message}`);
+  }
+}
+
+function parseImportedPeople(rawJson) {
+  const parsed = JSON.parse(rawJson);
+  const people = Array.isArray(parsed) ? parsed : parsed.people;
+  if (!Array.isArray(people)) {
+    throw new Error("manca l'elenco people.");
+  }
+
+  return people
+    .map((person) => ({
+      id: person.id || crypto.randomUUID(),
+      name: String(person.name || "").trim(),
+      role: String(person.role || ""),
+      bio: String(person.bio || ""),
+      desire: String(person.desire || ""),
+      offers: String(person.offers || ""),
+      needs: String(person.needs || ""),
+      talents: String(person.talents || ""),
+      tags: String(person.tags || ""),
+      availability: ["Alta", "Media", "Bassa", "A chiamata"].includes(person.availability)
+        ? person.availability
+        : "Media",
+      closeness: clamp(Number(person.closeness ?? 50), 0, 100),
+      collage: normalizeEditorCollage(person.collage || createEmptyPerson().collage),
+      owner_id: person.owner_id || "",
+      owner_email: person.owner_email || "",
+      is_visible: person.is_visible !== false,
+      updated_at: person.updated_at || new Date().toISOString()
+    }))
+    .filter((person) => person.name);
+}
+
+async function replaceSupabasePeople(people) {
+  if (!state.supabase) {
+    return { ok: false, message: "Supabase non configurato." };
+  }
+
+  const currentIds = state.people.map((person) => person.id);
+  if (currentIds.length) {
+    const { error: deleteError } = await state.supabase
+      .from(PEOPLE_TABLE)
+      .delete()
+      .in("id", currentIds);
+    if (deleteError) {
+      return { ok: false, message: deleteError.message };
+    }
+  }
+
+  const records = people.map((person) => toSupabaseRecord(person, state.user));
+  const { error: insertError } = await state.supabase.from(PEOPLE_TABLE).insert(records);
+  if (insertError) {
+    return { ok: false, message: insertError.message };
+  }
+  return { ok: true };
+}
+
 function resetToDemo() {
   const confirmed = window.confirm("Ripristinare i dati demo? I dati locali verranno sostituiti.");
   if (!confirmed) {
@@ -1000,10 +1103,14 @@ function renderFloatingToolbar() {
   if (!bounds) {
     return "";
   }
-  const left = `${(bounds.cx / 240) * 100}%`;
-  const top = `${(bounds.y / 240) * 100}%`;
+  const left = `${((18 + bounds.cx * 0.86) / 280) * 100}%`;
+  const top = `${((18 + bounds.y * 0.86) / 280) * 100}%`;
   return `
     <div class="floating-toolbar" style="left:${left}; top:${top};">
+      <button type="button" data-toolbar-action="rotate-left" title="Ruota a sinistra" aria-label="Ruota a sinistra">${iconRotateLeft()}</button>
+      <button type="button" data-toolbar-action="rotate-right" title="Ruota a destra" aria-label="Ruota a destra">${iconRotateRight()}</button>
+      <button type="button" data-toolbar-action="smaller" title="Riduci" aria-label="Riduci">${iconMinus()}</button>
+      <button type="button" data-toolbar-action="larger" title="Ingrandisci" aria-label="Ingrandisci">${iconPlus()}</button>
       <button type="button" data-toolbar-action="remove" title="Elimina" aria-label="Elimina">${iconTrash()}</button>
     </div>
   `;
@@ -1015,7 +1122,32 @@ function bindFloatingToolbar() {
       event.stopPropagation();
       const action = button.dataset.toolbarAction;
       if (action === "remove") removeCustomImage();
+      if (action === "rotate-left") transformActiveLayer({ rotationDelta: -12 });
+      if (action === "rotate-right") transformActiveLayer({ rotationDelta: 12 });
+      if (action === "smaller") transformActiveLayer({ scaleFactor: 0.9 });
+      if (action === "larger") transformActiveLayer({ scaleFactor: 1.1 });
     });
+  });
+}
+
+function transformActiveLayer({ rotationDelta = 0, scaleFactor = 1 }) {
+  const fragment = getActiveFragment();
+  if (fragment) {
+    fragment.rotation = clamp(fragment.rotation + rotationDelta, -360, 360);
+    fragment.width = clamp(fragment.width * scaleFactor, 24, 210);
+    fragment.height = clamp(fragment.height * scaleFactor, 24, 210);
+    renderCollagePreviewFromForm();
+    return;
+  }
+
+  const key = getActiveLibraryKey();
+  if (!key) {
+    return;
+  }
+  const transform = getLibraryTransform(key);
+  updateActiveLibraryTransform({
+    rotation: clamp((transform.rotation || 0) + rotationDelta, -360, 360),
+    scale: clamp((transform.scale || 1) * scaleFactor, 0.3, 2.2)
   });
 }
 
@@ -1249,6 +1381,16 @@ function dampScaleRatio(ratio) {
   return 1 + Math.sign(delta) * (magnitude - deadZone) * 0.68;
 }
 
+function getStagePoint(event, stage) {
+  const rect = stage.getBoundingClientRect();
+  return {
+    x: ((event.clientX - rect.left) * (280 / rect.width) - 18) / 0.86,
+    y: ((event.clientY - rect.top) * (280 / rect.height) - 18) / 0.86,
+    scaleX: 280 / rect.width / 0.86,
+    scaleY: 280 / rect.height / 0.86
+  };
+}
+
 function handlePreviewPointerDown(event) {
   const handle = event.target.closest("[data-handle-action]");
   if (handle && state.editorCollage) {
@@ -1258,26 +1400,24 @@ function handlePreviewPointerDown(event) {
     if (!stage) {
       return;
     }
-    const rect = stage.getBoundingClientRect();
     const fragment = getActiveFragment();
     const libraryKey = getActiveLibraryKey();
     const transform = libraryKey ? getLibraryTransform(libraryKey) : null;
     const centerX = fragment ? fragment.x : 122 + transform.x;
     const centerY = fragment ? fragment.y : 122 + transform.y;
-    const startPointX = (event.clientX - rect.left) * (240 / rect.width);
-    const startPointY = (event.clientY - rect.top) * (240 / rect.height);
+    const startPoint = getStagePoint(event, stage);
     const startDistance = Math.max(
       12,
-      Math.hypot(startPointX - centerX, startPointY - centerY)
+      Math.hypot(startPoint.x - centerX, startPoint.y - centerY)
     );
-    const startAngle = Math.atan2(startPointY - centerY, startPointX - centerX) * (180 / Math.PI);
+    const startAngle = Math.atan2(startPoint.y - centerY, startPoint.x - centerX) * (180 / Math.PI);
     state.dragState = {
       layerId: state.activeFragmentId,
       mode: handle.dataset.handleAction,
       startX: event.clientX,
       startY: event.clientY,
-      scaleX: 240 / rect.width,
-      scaleY: 240 / rect.height,
+      scaleX: startPoint.scaleX,
+      scaleY: startPoint.scaleY,
       baseRotation: fragment ? fragment.rotation : transform.rotation,
       baseWidth: fragment ? fragment.width : 100,
       baseHeight: fragment ? fragment.height : 100,
@@ -1303,7 +1443,7 @@ function handlePreviewPointerDown(event) {
   if (!stage) {
     return;
   }
-  const rect = stage.getBoundingClientRect();
+  const startPoint = getStagePoint(event, stage);
   const fragment = getActiveFragment();
   const libraryKey = getActiveLibraryKey();
   const baseX = fragment ? fragment.x : getLibraryTransform(libraryKey).x + 122;
@@ -1317,8 +1457,8 @@ function handlePreviewPointerDown(event) {
     baseY,
     baseCropX: fragment?.cropX ?? 0,
     baseCropY: fragment?.cropY ?? 0,
-    scaleX: 240 / rect.width,
-    scaleY: 240 / rect.height
+    scaleX: startPoint.scaleX,
+    scaleY: startPoint.scaleY
   };
   window.addEventListener("pointermove", handlePreviewPointerMove);
   window.addEventListener("pointerup", handlePreviewPointerUp);
@@ -1333,9 +1473,9 @@ function handlePreviewPointerMove(event) {
   const dx = (event.clientX - state.dragState.startX) * state.dragState.scaleX;
   const dy = (event.clientY - state.dragState.startY) * state.dragState.scaleY;
   const stage = elements.collagePreview.querySelector(".collage-svg");
-  const rect = stage?.getBoundingClientRect();
-  const pointX = rect ? (event.clientX - rect.left) * state.dragState.scaleX : state.dragState.centerX;
-  const pointY = rect ? (event.clientY - rect.top) * state.dragState.scaleY : state.dragState.centerY;
+  const point = stage ? getStagePoint(event, stage) : null;
+  const pointX = point ? point.x : state.dragState.centerX;
+  const pointY = point ? point.y : state.dragState.centerY;
   if (state.dragState.mode === "rotate") {
     const currentAngle = Math.atan2(pointY - state.dragState.centerY, pointX - state.dragState.centerX) * (180 / Math.PI);
     const angle = dampRotationDelta(normalizeAngleDelta(currentAngle - state.dragState.startAngle));
@@ -1453,20 +1593,27 @@ function buildMapLayout(people) {
   const layout = new Map();
 
   [
-    { key: "core", baseRadius: 16, step: 8 },
-    { key: "middle", baseRadius: 31, step: 7.5 },
-    { key: "edge", baseRadius: 45, step: 6.8 }
-  ].forEach(({ key, baseRadius, step }) => {
+    { key: "core", minRadius: 9, maxRadius: 23, capacity: 9 },
+    { key: "middle", minRadius: 26, maxRadius: 37, capacity: 16 },
+    { key: "edge", minRadius: 40, maxRadius: 46, capacity: 24 }
+  ].forEach(({ key, minRadius, maxRadius, capacity }) => {
     const items = grouped[key];
     items.forEach((person, index) => {
-      const ringIndex = Math.floor(index / 14);
-      const inRingIndex = index % 14;
-      const ringCount = Math.min(14, items.length - ringIndex * 14);
-      const angle = ((Math.PI * 2) / ringCount) * inRingIndex + ((stableHash(person.id) % 17) * Math.PI) / 180;
-      const radius = baseRadius + ringIndex * step + (stableHash(`${person.id}-j`) % 4) - 2;
+      const ringIndex = Math.floor(index / capacity);
+      const inRingIndex = index % capacity;
+      const ringCount = Math.min(capacity, items.length - ringIndex * capacity);
+      const radiusStep = Math.max(3.4, (maxRadius - minRadius) / Math.max(1, Math.ceil(items.length / capacity)));
+      const radius = clamp(
+        minRadius + ringIndex * radiusStep + ((stableHash(`${person.id}-r`) % 5) - 2) * 0.55,
+        minRadius,
+        maxRadius
+      );
+      const goldenOffset = ringIndex * 137.508;
+      const personalOffset = stableHash(person.id) % 23;
+      const angle = (((360 / Math.max(1, ringCount)) * inRingIndex + goldenOffset + personalOffset) % 360) * (Math.PI / 180);
       layout.set(person.id, {
-        x: clamp(50 + Math.cos(angle) * radius, 8, 92),
-        y: clamp(50 + Math.sin(angle) * radius, 8, 92)
+        x: clamp(50 + Math.cos(angle) * radius, 7, 93),
+        y: clamp(50 + Math.sin(angle) * radius, 7, 93)
       });
     });
   });
@@ -2187,6 +2334,22 @@ function iconBackward() {
 
 function iconForward() {
   return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 7v10"></path><path d="M6 7l6 5-6 5"></path></svg>`;
+}
+
+function iconRotateLeft() {
+  return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7v6h6"></path><path d="M5 13a7 7 0 1 0 2-7"></path></svg>`;
+}
+
+function iconRotateRight() {
+  return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v6h-6"></path><path d="M19 13a7 7 0 1 1-2-7"></path></svg>`;
+}
+
+function iconMinus() {
+  return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"></path></svg>`;
+}
+
+function iconPlus() {
+  return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12"></path><path d="M6 12h12"></path></svg>`;
 }
 
 function iconTrash() {
